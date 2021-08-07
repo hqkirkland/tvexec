@@ -9,6 +9,10 @@ from M3UReader import M3UReader
 from datetime import datetime, timedelta
 from optparse import OptionParser
 
+if os.name == "nt":
+    SHELL_EXTENSION = "bat"
+else:
+    SHELL_EXTENSION = "sh"
 
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://10.0.0.74/show/stream"):
@@ -146,6 +150,11 @@ class DaySchedule(object):
         return None
 
     def validday(self):
+        # Enter each hour for this day.
+        hour_scan_time = self.schedule_start_datetime
+        batch_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
+        batch_path = os.path.join(os.curdir, batch_path)
+
         self.log_message("Generating schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
 
         m3u_reader_collection = { }
@@ -178,9 +187,6 @@ class DaySchedule(object):
             new_m3u_reader = M3UReader ( path_to_m3u, series_key )
             m3u_reader_collection.update({ series_key: new_m3u_reader })
 
-        # Enter each hour for this day.
-        hour_scan_time = self.schedule_start_datetime
-        batch_path = ".\\broadcast_{0}.bat".format(self.schedule_date.strftime("%Y%m%d"))
 
         if os.path.exists(batch_path):
             os.remove(batch_path)
@@ -195,7 +201,6 @@ class DaySchedule(object):
                 # Current iteration time.
                 # Enter each entry for this hour block.
                 hour_block = self.lineup_strdict[self.day_of_week][hour_key]
-                hour_series_count = len(hour_block)
 
                 n = 0
                 while hour_scan_time < hour_end_time:
@@ -246,6 +251,8 @@ class DaySchedule(object):
 
         print("[{0}] {1}".format(level.upper(), message))
 
+# Main script begin
+
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░")
 print("░░▓▓▒░▒▒░▒▒░▒▒░▒▒░▒▓▓░░░░░░░░░░░░░░")
@@ -258,17 +265,10 @@ print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░�
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░")
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 
-# Main script begin
-
 schedule = DaySchedule()
 schedule.gen_series_playlists()
 schedule.genday()
 schedule.validday()
-
-if os.name == "nt":
-    SHELL_EXTENSION = "bat"
-else:
-    SHELL_EXTENSION = "sh"
 
 batch_start_key = input(">> Start today's batch (Y/N)?: ")
 

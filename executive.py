@@ -11,8 +11,10 @@ from optparse import OptionParser
 
 if os.name == "nt":
     SHELL_EXTENSION = "bat"
+    SHELL_NEWLINE = '\r\n'
 else:
     SHELL_EXTENSION = "sh"
+    SHELL_NEWLINE = '\n'
 
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://10.0.0.74/show/stream"):
@@ -20,6 +22,7 @@ class DaySchedule(object):
         self.day_of_week = self.schedule_date.strftime('%A')
         self.lineup = { }
         self.rtmp_endpoint = rtmp_ept
+        self.shell_broadcast_path = ""
 
         try: 
             with open("lineup.json", "r") as lineup_file:
@@ -228,15 +231,18 @@ class DaySchedule(object):
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
                     
-                    batch_line = "ffmpeg {0} -i \"{1}\" {2} {3} ".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
+                    batch_line = "ffmpeg {0} -i \"{1}\" {2} {3}{4}".format(realtime_flag, scan_entry_file, filter_flags, output_flags, SHELL_NEWLINE)
 
-                    broadcast_batch_file.writelines(batch_line + '\r\n')
+                    broadcast_batch_file.writelines(batch_line)
                     hour_scan_time = entry_end_time
 
                     if n < len(hour_block) - 1:
                         n += 1
             
             self.schedule_end_datetime = hour_scan_time
+            self.shell_broadcast_path = batch_path
+
+            self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
             self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
         
         for series_key in series_counts.keys():
@@ -270,15 +276,13 @@ schedule.gen_series_playlists()
 schedule.genday()
 schedule.validday()
 
-batch_start_key = input(">> Start today's batch (Y/N)?: ")
+broadcast_start_key = input(">> Start today's broadcast (Y/N)?: ")
 
-if batch_start_key == 'y':
-    shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
-    shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
-    schedule.log_message("{0} created for: {1} ".format(shell_broadcast_path, schedule.schedule_date.strftime("%m/%d/%Y") ) )
-    
-    if os.path.exists(shell_broadcast_path):
-        batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)
+if broadcast_start_key == 'y':
+    if os.path.exists(schedule.shell_broadcast_path):
+        schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
+
+        batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir)
         stdout, stderr = batch.communicate()
 
 while True:
@@ -294,10 +298,7 @@ while True:
         schedule.genday()
         schedule.validday()
 
-        shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
-        shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
-        schedule.log_message("{0} created for: {1} ".format(shell_broadcast_path, schedule.schedule_date.strftime("%m/%d/%Y") ) )
-
-        if os.path.exists(shell_broadcast_path):
-            batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)
+        if os.path.exists(schedule.shell_broadcast_path):
+            schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
+            batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir)
             stdout, stderr = batch.communicate()

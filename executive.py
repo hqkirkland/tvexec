@@ -1,14 +1,14 @@
 import json
 import os
-import subprocess
 import random
+import stat
+import subprocess
 
 import natsort
 
 from M3UReader import M3UReader
 from datetime import datetime, timedelta
 from optparse import OptionParser
-from stat import S_IEXEC
 
 if os.name == "nt":
     SHELL_EXTENSION = "bat"
@@ -25,7 +25,6 @@ class DaySchedule(object):
         self.lineup = { }
         self.rtmp_endpoint = rtmp_ept
         self.shell_broadcast_path = ""
-        self.execute_mode = S_IEXEC
 
         try: 
             with open("lineup.json", "r") as lineup_file:
@@ -193,7 +192,6 @@ class DaySchedule(object):
             new_m3u_reader = M3UReader ( path_to_m3u, series_key )
             m3u_reader_collection.update({ series_key: new_m3u_reader })
 
-
         if os.path.exists(batch_path):
             os.remove(batch_path)
         with open(batch_path, "x") as broadcast_batch_file:
@@ -244,8 +242,10 @@ class DaySchedule(object):
             
             self.schedule_end_datetime = hour_scan_time
             self.shell_broadcast_path = batch_path
+        
+        st = os.stat(self.shell_broadcast_path)
+        os.chmod(self.shell_broadcast_path, st.st_mode | stat.S_IEXEC)
 
-        os.chmod(self.shell_broadcast_path, self.execute_mode)
         self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
         self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
         
@@ -304,5 +304,5 @@ while True:
 
         if os.path.exists(schedule.shell_broadcast_path):
             schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
-            batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir)
+            batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir, shell=True)
             stdout, stderr = batch.communicate()

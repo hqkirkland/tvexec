@@ -93,7 +93,7 @@ class DaySchedule(object):
                             self.log_message("> Skipping: {0}".format(path_to_episode_file))
                             continue
 
-                        result = subprocess.run([".\\ffmpeg\\bin\\ffprobe", "-v", "error", "-show_entries",
+                        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                                                 "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", 
                                                 path_to_episode_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                         clean_result = result.stdout.strip().split(b'\r')[0]

@@ -270,32 +270,33 @@ if os.name == "nt":
 else:
     SHELL_EXTENSION = "sh"
 
-batch_start_key = input("Start today's batch (Y/N)?: ")
+batch_start_key = input(">> Start today's batch (Y/N)?: ")
 
 if batch_start_key == 'y':
-    schedule.log_message("Batch done for:{0} ".format(schedule.schedule_date.strftime("%Y%m%d") ) )
     shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
     shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
+    schedule.log_message("{0} created for: {1} ".format(shell_broadcast_path, schedule.schedule_date.strftime("%m/%d/%Y") ) )
     
     if os.path.exists(shell_broadcast_path):
         batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)
         stdout, stderr = batch.communicate()
 
 while True:
-    continue_key = input("Continue to next day (Y/N)?: ")
+    continue_key = input(">> Continue to next day (Y/N)?: ")
     if continue_key == 'n':
         break
     else:
         # schedule_datetime += timedelta(days=1)
-        print("Generate schedule for: {0}".format(schedule.schedule_end_datetime.strftime("%c (%I:%M %p)")))
+        print(">> Generating schedule for: {0}".format(schedule.schedule_end_datetime.strftime("%c (%I:%M %p)")))
 
         schedule = DaySchedule(schedule.schedule_end_datetime)
         schedule.gen_series_playlists()
         schedule.genday()
         schedule.validday()
 
-        shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION)
+        shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
         shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
+        schedule.log_message("{0} created for: {1} ".format(shell_broadcast_path, schedule.schedule_date.strftime("%m/%d/%Y") ) )
 
         if os.path.exists(shell_broadcast_path):
             batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)

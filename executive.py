@@ -62,9 +62,9 @@ class DaySchedule(object):
                 with open(path_to_m3u, "x") as series_m3u:
                     series_m3u.writelines(("#EXTM3U" + '\n',))
                     
-                    dirs_in_seriespath = [d for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
-                    files_in_seriespath = [f for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
-
+                    dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
+                    files_in_seriespath = [os.path.normpath(f) for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
+                    
                     dirs_in_seriespath = natsort.natsorted(dirs_in_seriespath)
                     files_in_series = natsort.natsorted(files_in_seriespath)
 
@@ -233,11 +233,11 @@ class DaySchedule(object):
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
                     
-                    batch_line = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
-                    self.ffmpeg_commands.append(batch_line)                    
-                    batch_line = "{0}{1}".format(batch_line, SHELL_NEWLINE)
+                    ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
+                    self.ffmpeg_commands.append(ffmpeg_command)                    
+                    ffmpeg_command = "{0}{1}".format(ffmpeg_command, SHELL_NEWLINE)
 
-                    broadcast_batch_file.writelines(batch_line)
+                    # broadcast_batch_file.writelines(ffmpeg_command)
                     hour_scan_time = entry_end_time
 
                     if n < len(hour_block) - 1:
@@ -290,7 +290,7 @@ if broadcast_start_key == 'y':
         schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
 
         for command in schedule.ffmpeg_commands:
-            ffmpeg_subprocess = subprocess.Popen(command, cwd=os.curdir)
+            ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
             stdout, stderr = ffmpeg_subprocess.communicate()
 
 while True:
@@ -309,5 +309,5 @@ while True:
             schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
 
             for command in schedule.ffmpeg_commands:
-                ffmpeg_subprocess = subprocess.Popen(command, cwd=os.curdir)
+                ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
                 stdout, stderr = ffmpeg_subprocess.communicate()

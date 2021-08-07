@@ -1,5 +1,5 @@
 import json
-import os, sys
+import os
 import subprocess
 import random
 
@@ -8,7 +8,7 @@ import natsort
 from M3UReader import M3UReader
 from datetime import datetime, timedelta
 from optparse import OptionParser
-from stat import *
+from stat import S_IEXEC
 
 if os.name == "nt":
     SHELL_EXTENSION = "bat"
@@ -17,6 +17,7 @@ else:
     SHELL_EXTENSION = "sh"
     SHELL_NEWLINE = '\n'
 
+
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://10.0.0.74/show/stream"):
         self.set_datetimes(schedule_start_datetime)
@@ -24,6 +25,7 @@ class DaySchedule(object):
         self.lineup = { }
         self.rtmp_endpoint = rtmp_ept
         self.shell_broadcast_path = ""
+        self.execute_mode = S_IEXEC
 
         try: 
             with open("lineup.json", "r") as lineup_file:
@@ -243,7 +245,7 @@ class DaySchedule(object):
             self.schedule_end_datetime = hour_scan_time
             self.shell_broadcast_path = batch_path
 
-        os.chmod(self.shell_broadcast_path, stat.S_IXUSR)
+        os.chmod(self.shell_broadcast_path, self.execute_mode)
         self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
         self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
         

@@ -19,12 +19,13 @@ else:
 
 
 class DaySchedule(object):
-    def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://10.0.0.74/show/stream"):
+    def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream"):
         self.set_datetimes(schedule_start_datetime)
         self.day_of_week = self.schedule_date.strftime('%A')
         self.lineup = { }
         self.rtmp_endpoint = rtmp_ept
         self.shell_broadcast_path = ""
+        self.ffmpeg_commands = []
 
         try: 
             with open("lineup.json", "r") as lineup_file:
@@ -232,7 +233,9 @@ class DaySchedule(object):
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
                     
-                    batch_line = "ffmpeg {0} -i \"{1}\" {2} {3}{4}".format(realtime_flag, scan_entry_file, filter_flags, output_flags, SHELL_NEWLINE)
+                    batch_line = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
+                    self.ffmpeg_commands.append(batch_line)                    
+                    batch_line = "{0}{1}".format(batch_line, SHELL_NEWLINE)
 
                     broadcast_batch_file.writelines(batch_line)
                     hour_scan_time = entry_end_time
@@ -286,15 +289,15 @@ if broadcast_start_key == 'y':
     if os.path.exists(schedule.shell_broadcast_path):
         schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
 
-        batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir)
-        stdout, stderr = batch.communicate()
+        for command in schedule.ffmpeg_commands:
+            ffmpeg_subprocess = subprocess.Popen(command, cwd=os.curdir)
+            stdout, stderr = ffmpeg_subprocess.communicate()
 
 while True:
     continue_key = input(">> Continue to next day (Y/N)?: ")
     if continue_key == 'n':
         break
     else:
-        # schedule_datetime += timedelta(days=1)
         print(">> Generating schedule for: {0}".format(schedule.schedule_end_datetime.strftime("%c (%I:%M %p)")))
 
         schedule = DaySchedule(schedule.schedule_end_datetime)
@@ -304,5 +307,7 @@ while True:
 
         if os.path.exists(schedule.shell_broadcast_path):
             schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
-            batch = subprocess.Popen(schedule.shell_broadcast_path, cwd=os.curdir, shell=True)
-            stdout, stderr = batch.communicate()
+
+            for command in schedule.ffmpeg_commands:
+                ffmpeg_subprocess = subprocess.Popen(command, cwd=os.curdir)
+                stdout, stderr = ffmpeg_subprocess.communicate()

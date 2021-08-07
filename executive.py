@@ -1,5 +1,5 @@
 import json
-import os
+import os, sys
 import subprocess
 import random
 
@@ -8,6 +8,7 @@ import natsort
 from M3UReader import M3UReader
 from datetime import datetime, timedelta
 from optparse import OptionParser
+from stat import *
 
 if os.name == "nt":
     SHELL_EXTENSION = "bat"
@@ -242,8 +243,9 @@ class DaySchedule(object):
             self.schedule_end_datetime = hour_scan_time
             self.shell_broadcast_path = batch_path
 
-            self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
-            self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
+        os.chmod(self.shell_broadcast_path, stat.S_IXUSR)
+        self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
+        self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
         
         for series_key in series_counts.keys():
             self.log_message("Saving popped playlist for {0}".format(series_key))

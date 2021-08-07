@@ -265,13 +265,20 @@ schedule.gen_series_playlists()
 schedule.genday()
 schedule.validday()
 
+if os.name == "nt":
+    SHELL_EXTENSION = "bat"
+else:
+    SHELL_EXTENSION = "sh"
 
 batch_start_key = input("Start today's batch (Y/N)?: ")
+
 if batch_start_key == 'y':
     schedule.log_message("Batch done for:{0} ".format(schedule.schedule_date.strftime("%Y%m%d") ) )
-    batch_path = ".\\broadcast_{0}.bat".format(schedule.schedule_date.strftime("%Y%m%d") )
-    if os.path.exists(batch_path):
-        batch = subprocess.Popen(batch_path, cwd=r".\\")
+    shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
+    shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
+    
+    if os.path.exists(shell_broadcast_path):
+        batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)
         stdout, stderr = batch.communicate()
 
 while True:
@@ -287,7 +294,9 @@ while True:
         schedule.genday()
         schedule.validday()
 
-        batch_path = ".\\broadcast_{0}.bat".format(schedule.schedule_date.strftime("%Y%m%d"))
-        if os.path.exists(batch_path):
-            batch = subprocess.Popen(batch_path, cwd=r".\\")
+        shell_broadcast_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION)
+        shell_broadcast_path = os.path.join(os.curdir, shell_broadcast_path)
+
+        if os.path.exists(shell_broadcast_path):
+            batch = subprocess.Popen(shell_broadcast_path, cwd=os.curdir)
             stdout, stderr = batch.communicate()

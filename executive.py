@@ -226,7 +226,8 @@ class DaySchedule(object):
 
                     filter_flags = ""
                     realtime_flag = "-re"
-                    output_flags = "-preset veryfast -vcodec libx264 -acodec aac -g 15 -strict -2 -f flv {0}".format(self.rtmp_endpoint)
+                    # -preset veryfast
+                    output_flags = "-vcodec libx264 -acodec aac -g 15 -strict -2 -f flv {0}".format(self.rtmp_endpoint)
 
                     if "ffmpegFilterFlags" in scan_series_data:
                         filter_flags = scan_series_data["ffmpegFilterFlags"]

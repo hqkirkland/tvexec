@@ -292,7 +292,7 @@ if broadcast_start_key == 'y':
 
         for command in schedule.ffmpeg_commands:
             ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
-	    # stdout, stderr = ffmpeg_subprocess.communicate()
+            stdout, stderr = ffmpeg_subprocess.communicate()
 
 while True:
     continue_key = input(">> Continue to next day (Y/N)?: ")

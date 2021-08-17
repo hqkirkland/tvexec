@@ -43,7 +43,7 @@ class DaySchedule(object):
             self.schedule_end_datetime = datetime.today().replace(hour=23, minute=59, second=59)
         else:
             self.schedule_date = schedule_start_datetime.date()
-            #self.schedule_start_datetime = schedule_start_datetime.replace(hour=0, minute=0, second=0)
+            # self.schedule_start_datetime = schedule_start_datetime.replace(hour=0, minute=0, second=0)
             self.schedule_start_datetime = schedule_start_datetime
             self.schedule_end_datetime =  schedule_start_datetime.replace(hour=23, minute=59, second=59)
 

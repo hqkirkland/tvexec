@@ -65,8 +65,8 @@ class DaySchedule(object):
                     dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
                     files_in_seriespath = [os.path.normpath(f) for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
                     
-                    dirs_in_seriespath = natsort.natsorted(dirs_in_seriespath)
-                    files_in_series = natsort.natsorted(files_in_seriespath)
+                    # Is dir sort necessary if all files get natsorted by end?
+                    # dirs_in_seriespath = natsort.natsorted(dirs_in_seriespath)
 
                     # This next condition likely means that the directory is split by season.
                     if len(dirs_in_seriespath) > len(files_in_seriespath):
@@ -83,6 +83,9 @@ class DaySchedule(object):
                         subdir_season_path = path_to_series
                         files_in_series = files_in_seriespath
                     
+                    # Sort files last.
+                    files_in_series = natsort.natsorted(files_in_seriespath)
+
                     if "playlistType" in series:
                         if series["playlistType"] == "shuffle":
                             print("> Shuffling playlist for: {0}".format(series_key))
@@ -131,27 +134,23 @@ class DaySchedule(object):
                 slot_hour = slot_hour.replace(hour=hour - 1)
                 prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                 blocks = self.lineup_strdict[self.day_of_week][prev_hour_key]
-                self.log_message("Hour {0} not set! Repeating previous Hour: {1}".format(hour_key, prev_hour_key), "warn")
+                self.log_message("Hour {0} does not exist for {1} Repeating: Hour {2}".format(hour_key, self.day_of_week, prev_hour_key), "warn")
 
             else:
                 blocks = self.lineup_strdict[self.day_of_week][hour_key]
-                if blocks[0] == "" and hour != "0":
-                    self.log_message("Hour {0}, Block 0 not set! Repeating previous block.".format(hour), "warn")
-                    slot_hour = slot_hour.replace(hour=hour - 1)
-                    prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
-                    blocks[0] = self.lineup_strdict[self.day_of_week][prev_hour_key][1]
-                if blocks[1] == "":
-                    self.log_message("Hour {0}, Block 1 not set! Repeating previous block".format(hour), "warn")
-                    blocks[1] = blocks[0]
-                if (len(blocks) == 4):
-                    if blocks[2] == "" and hour != "0":
-                        self.log_message("Hour {0}, Block 2 not set! Repeating previous block.".format(hour), "warn")
-                        blocks[2] = blocks[0]
-                    if blocks[3] == "":
-                        self.log_message("Hour {0}, Block 3 not set! Repeating previous block".format(hour), "warn")
-                        blocks[3] = blocks[1]
+                for n in range(0, len(blocks)):
+                    if blocks[n] == "":
+                        if n == 0 and hour != "0":
+                            slot_hour = slot_hour.replace(hour=hour - 1)
+                            prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
 
-            self.lineup_strdict[self.day_of_week][hour_key] = blocks
+                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), prev_hour_key, str(n)), "warn")
+                            blocks[n] = self.lineup_strdict[self.day_of_week][prev_hour_key][n]
+                        else:
+                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), prev_hour_key, str(n)), "warn")
+                            blocks[n] = self.lineup_strdict[self.day_of_week][prev_hour_key][n]
+
+                self.lineup_strdict[self.day_of_week][hour_key] = blocks
 
         return None
 
@@ -227,7 +226,7 @@ class DaySchedule(object):
                     filter_flags = ""
                     realtime_flag = "-re"
                     # -preset veryfast
-                    output_flags = "-vcodec libx264 -acodec aac -g 15 -strict -2 -f flv {0}".format(self.rtmp_endpoint)
+                    output_flags = "-vcodec libx264 -acodec ac3 -g 15 -strict -2 -f flv {0}".format(self.rtmp_endpoint)
 
                     if "ffmpegFilterFlags" in scan_series_data:
                         filter_flags = scan_series_data["ffmpegFilterFlags"]

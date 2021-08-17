@@ -140,6 +140,7 @@ class DaySchedule(object):
                 blocks = self.lineup_strdict[self.day_of_week][hour_key]
                 for n in range(0, len(blocks)):
                     if blocks[n] == "":
+                        prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                         if n == 0 and hour != "0":
                             slot_hour = slot_hour.replace(hour=hour - 1)
                             prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")

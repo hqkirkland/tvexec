@@ -84,7 +84,7 @@ class DaySchedule(object):
                         files_in_series = files_in_seriespath
                     
                     # Sort files last.
-                    files_in_series = natsort.natsorted(files_in_seriespath)
+                    files_in_series = natsort.natsorted(files_in_series)
 
                     if "playlistType" in series:
                         if series["playlistType"] == "shuffle":
@@ -124,6 +124,7 @@ class DaySchedule(object):
                         series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))
 
     def genday(self):
+        self.log_message("Generating schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
         slot_hour = self.schedule_start_datetime
         slot_hour = slot_hour.replace(hour=0, minute=0, second=0)
         for hour in range(0, 24):
@@ -134,24 +135,23 @@ class DaySchedule(object):
                 slot_hour = slot_hour.replace(hour=hour - 1)
                 prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                 blocks = self.lineup_strdict[self.day_of_week][prev_hour_key]
-                self.log_message("Hour {0} does not exist for {1} Repeating: Hour {2}".format(hour_key, self.day_of_week, prev_hour_key), "warn")
+                self.log_message("Hour {0} does not exist for {1}; Repeating: Hour {2}".format(hour_key, self.day_of_week, prev_hour_key), "warn")
 
             else:
                 blocks = self.lineup_strdict[self.day_of_week][hour_key]
                 for n in range(0, len(blocks)):
-                    if blocks[n] == "":
-                        prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
+                    if blocks[n] == "":                            
                         if n == 0 and hour != "0":
+                            prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                             slot_hour = slot_hour.replace(hour=hour - 1)
                             prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
-
                             self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), prev_hour_key, str(n)), "warn")
                             blocks[n] = self.lineup_strdict[self.day_of_week][prev_hour_key][n]
                         else:
-                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), prev_hour_key, str(n)), "warn")
-                            blocks[n] = self.lineup_strdict[self.day_of_week][prev_hour_key][n]
+                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), hour_key, str(n - 1)), "warn")
+                            blocks[n] = self.lineup_strdict[self.day_of_week][hour_key][n - 1]
 
-                self.lineup_strdict[self.day_of_week][hour_key] = blocks
+            self.lineup_strdict[self.day_of_week][hour_key] = blocks
 
         return None
 
@@ -161,7 +161,7 @@ class DaySchedule(object):
         batch_path = "broadcast_{0}.{1}".format(schedule.schedule_date.strftime("%Y%m%d"), SHELL_EXTENSION )
         batch_path = os.path.join(os.curdir, batch_path)
 
-        self.log_message("Generating schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
+        self.log_message("Finalizing schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
 
         m3u_reader_collection = { }
         series_counts = {}
@@ -227,7 +227,7 @@ class DaySchedule(object):
                     filter_flags = ""
                     realtime_flag = "-re"
                     # -preset veryfast
-                    output_flags = "-vcodec libx264 -acodec ac3 -g 15 -strict -2 -f flv {0}".format(self.rtmp_endpoint)
+                    output_flags = "-vcodec libx264 -c:a aac -b:a 400k -channel_layout 5.1 -g 15 -strict experimental -f flv {0}".format(self.rtmp_endpoint)
 
                     if "ffmpegFilterFlags" in scan_series_data:
                         filter_flags = scan_series_data["ffmpegFilterFlags"]
@@ -267,17 +267,17 @@ class DaySchedule(object):
 
 # Main script begin
 
-print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
-print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░")
-print("░░▓▓▒░▒▒░▒▒░▒▒░▒▒░▒▓▓░░░░░░░░░░░░░░")
-print("░░▓▓░▒▒░▒▒░▒▒░▒▒░▒▒▓▓░░░░░░░░░░░░░░")
-print("░░▓▓▒▒░▒▒░▒▒░▒▒░▒▒░▓▓░░░░░░░░░░░░░░")
-print("░░▓▓▒░▒▒░▒▒░▒▒░▒▒░▒▓▓░░░░░░░░░░░░░░")
-print("░░▓▓░▒▒░▒▒░▒▒░▒▒░▒▒▓▓░░TV░░░░░░░░░░")
-print("░░▓▓▒▒░▒▒░▒▒░▒▒░▒▒░▓▓░░EXECUTIVE░░░")
-print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░")
-print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░")
-print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
+print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▒▒░░▒▒▒▒▒▒▒▒░░▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▒▒░░▒▒▒▒▒▒▒▒░░▒▒▓▓░░TELEVISION░░░░░░░░░░")
+print("░░▓▓▒▒▒▒░░░░░░░░▒▒▒▒▓▓░░E X E C U T I V E░░░")
+print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░")
+print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░░░░░░░░░")
+print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 
 schedule = DaySchedule()
 schedule.gen_series_playlists()
@@ -299,8 +299,6 @@ while True:
     if continue_key == 'n':
         break
     else:
-        print(">> Generating schedule for: {0}".format(schedule.schedule_end_datetime.strftime("%c (%I:%M %p)")))
-
         schedule = DaySchedule(schedule.schedule_end_datetime)
         schedule.gen_series_playlists()
         schedule.genday()

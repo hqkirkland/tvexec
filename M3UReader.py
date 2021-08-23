@@ -5,32 +5,34 @@ class M3UReader:
         self.playlist_entries = []
         self.m3u_file_path = m3u_file_path
 
-        if os.path.isfile(m3u_file_path):
-            self.m3u_file_path = m3u_file_path
-            with open(self.m3u_file_path, "r+") as series_m3u:
-                m3u_lines = series_m3u.readlines()
-                for i in range(0, len(m3u_lines)):
-                    m3u_line = m3u_lines[i].strip()
+        if not os.path.isfile(m3u_file_path):
+            return
+        
+        self.m3u_file_path = m3u_file_path
+        with open(self.m3u_file_path, "r+") as series_m3u:
+            m3u_lines = series_m3u.readlines()                    
+            for i in range(0, len(m3u_lines)):
+                m3u_line = m3u_lines[i].strip()
 
-                    if m3u_line == "#EXTM3U":
-                        continue
-                        # m3u_line = series_m3u.readline().strip()
-                        # Start M3U Entry Cursor @ 1
-                    
-                    if m3u_line.startswith("#EXTINF"):
-                        m3u_segments = m3u_line.split(',')
+                if m3u_line == "#EXTM3U":
+                    continue
+                    # m3u_line = series_m3u.readline().strip()
+                    # Start M3U Entry Cursor @ 1
+                
+                if m3u_line.startswith("#EXTINF"):
+                    m3u_segments = m3u_line.split(',')
 
-                        length_segment = m3u_segments[0].split(':')[1]
-                        episode_len = int(length_segment)
-                        episode_file_path = m3u_lines[i + 1].strip()
-                        episode_title = os.path.basename(episode_file_path)
+                    length_segment = m3u_segments[0].split(':')[1]
+                    episode_len = int(length_segment)
+                    episode_file_path = m3u_lines[i + 1].strip()
+                    episode_title = os.path.basename(episode_file_path)
 
-                        if os.path.isfile(episode_file_path):
-                            self.playlist_entries.append({
-                                "entry_title": episode_title,
-                                "m3u_duration": episode_len,
-                                "file_path": os.path.normpath(episode_file_path),
-                        })
+                    if os.path.isfile(episode_file_path):
+                        self.playlist_entries.append({
+                            "entry_title": episode_title,
+                            "m3u_duration": episode_len,
+                            "file_path": os.path.normpath(episode_file_path),
+                    })
     
     def pop_next_playlist_entry(self):
         next_playlist_entry = self.playlist_entries.pop(0)

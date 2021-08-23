@@ -1,48 +1,52 @@
 {
     "Dilbert": {
         "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward corporate world.",
-        "rootDirectory": "H:\\NetLibrary\\Dilbert\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Dilbert/"
+    },
+    "Fawlty Towers": {
+        "description": "Basil Fawlty's hotel, and his marriage to Sibyl, are in dire need of new management.",
+	"rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/"
     },
     "Frasier": {
         "description": "A radio psychiatrist moves back to his hometown of Seattle, Washington only to find himself mixed up in the personal chaos of family, friends, and self.",
-        "rootDirectory": "H:\\NetLibrary\\Frasier\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Frasier/"
     },
     "Fullmetal Alchemist: Brotherood": {
         "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to return to their original forms.",
-        "rootDirectory": "H:\\NetLibrary\\Fullmetal\\",
+        "rootDirectory": "/home/hunter/NetLibrary/Fullmetal/",
         "ffmpegFilterFlags": "-map 0:2 -map \"[overlay_out]\" -filter_complex \"[0:s:1][0:v:0]scale2ref[sub_out][vid_out];[vid_out][sub_out]overlay[overlay_out]\""
     },
     "King of the Hill": {
         "description": "Hank Hill navigates life in the ever-changing Texas town of Arlen with his wife Peggy, son Bobby, and niece Luanne Platter, with the help of their friends and neighbors.",
-        "rootDirectory": "H:\\NetLibrary\\King of the Hill\\"
+        "rootDirectory": "/home/hunter/NetLibrary/King of the Hill/"
     },
     "Movies": {
         "description": "Movies. ",
-        "rootDirectory": "H:\\NetLibrary\\Movies\\",
+        "rootDirectory": "/home/hunter/NetLibrary/Movies/",
         "playlistType": "shuffle"
     },
     "MST3K": {
         "description": "Held hostage by villainous corporate captors and forced to watch awful mystery and sci-fi movies, the host and his robot pals make the best of their cringey situation with riffs, jokes, and memes.",
-        "rootDirectory": "H:\\NetLibrary\\MST3K\\"
+        "rootDirectory": "/home/hunter/NetLibrary/MST3K/"
     },
     "Peep Show": {
         "description": "Flatmates Mark and Jez are far from being the \"odd couple\" of London. They're a lot more troubled.",
-        "rootDirectory": "H:\\NetLibrary\\Peep_Show\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Peep_Show/"
     },
     "Star Trek: Deep Space 9": {
         "description": "A mixed team of Federation and Bajoran crew members operate the distant space station safeguarding the newly-discovered wormhole to the unexplored Gamma Quadrant of our galaxy.",
-        "rootDirectory": "H:\\NetLibrary\\Star Trek DS9\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Star Trek DS9/"
     },
     "Star Trek: The Next Generation": {
         "description": "These are the voyages of the starship 'Enterprise.' Its continuing mission: to explore strange, new world; to seek out new life and new civilizations; to boldly go where no one has gone before!",
-        "rootDirectory": "H:\\NetLibrary\\Star Trek TNG\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Star Trek TNG/"
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",
-        "rootDirectory": "H:\\NetLibrary\\Sifl_and_Olly\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Sifl_and_Olly"
     },
     "Taxi": {
         "description": "This seminal 1980s TV sitcom is about the life and times of a group of New York City's finest taxi drivers.",
-        "rootDirectory": "H:\\NetLibrary\\Taxi\\"
+        "rootDirectory": "/home/hunter/NetLibrary/Taxi/"
     }
 }

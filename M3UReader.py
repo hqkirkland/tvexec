@@ -43,10 +43,9 @@ class M3UReader:
         if os.path.isfile(self.m3u_file_path):
             os.remove(self.m3u_file_path)
         with open(self.m3u_file_path, "x") as series_m3u:
+            series_m3u.writelines(("#EXTM3U" + '\n',))
             i = 0
             for entry in self.playlist_entries:
-                series_m3u.writelines(("#EXTM3U" + '\n',))
-
                 episode_title = "{0} - {1}".format(i, entry["entry_title"])
                 episode_title = "#EXTINF:{0},{1}\n".format(str(int(entry["m3u_duration"])), episode_title)
                 

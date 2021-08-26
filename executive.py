@@ -58,13 +58,13 @@ class DaySchedule(object):
                 path_to_m3u = os.path.join(path_to_series, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
                 if (os.path.exists(path_to_m3u)):
                     continue
-                
+
                 with open(path_to_m3u, "x") as series_m3u:
                     series_m3u.writelines(("#EXTM3U" + '\n',))
-                    
+
                     dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
                     files_in_seriespath = [os.path.normpath(f) for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
-                    
+
                     # Is dir sort necessary if all files get natsorted by end?
                     # dirs_in_seriespath = natsort.natsorted(dirs_in_seriespath)
 
@@ -82,15 +82,15 @@ class DaySchedule(object):
                     else:
                         subdir_season_path = path_to_series
                         files_in_series = files_in_seriespath
-                    
+
                     # Sort files last.
                     files_in_series = natsort.natsorted(files_in_series)
 
                     if "playlistType" in series:
                         if series["playlistType"] == "shuffle":
-                            print("> Shuffling playlist for: {0}".format(series_key))
+                            self.log_message("> Shuffling playlist for: {0}".format(series_key))
                             random.shuffle(files_in_series)
-                            
+
                     for episode_file in files_in_series:                        
                         path_to_episode_file = os.path.normpath(os.path.join(subdir_season_path, episode_file))
                         self.log_message("Episode path: {0}".format(path_to_episode_file))
@@ -178,15 +178,15 @@ class DaySchedule(object):
                     series_counts[series_key] = series_counts[series_key] + 1
                 else:
                     series_counts.update({ series_key: 1 })
-            
+
         for series_key in series_counts.keys():
             if series_key in m3u_reader_collection.keys():
                 continue
 
             series = self.series_list[series_key]
-            
+
             path_to_series = os.path.normpath(series["rootDirectory"])
-            
+
             m3u_safe_series_key = series_key.replace(':', ' ')
             path_to_m3u = os.path.join(path_to_series, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
 
@@ -211,7 +211,7 @@ class DaySchedule(object):
                 while hour_scan_time < hour_end_time:
                     if hour_scan_time > self.schedule_end_datetime:
                         break
-                    
+
                     scan_series = hour_block[n]
                     scan_series_data = self.series_list[scan_series]
                     scan_entry = m3u_reader_collection[scan_series].pop_next_playlist_entry()
@@ -233,9 +233,9 @@ class DaySchedule(object):
                         filter_flags = scan_series_data["ffmpegFilterFlags"]
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
-                    
+
                     ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
-                    self.ffmpeg_commands.append(ffmpeg_command)                    
+                    self.ffmpeg_commands.append(ffmpeg_command)
                     ffmpeg_command = "{0}{1}".format(ffmpeg_command, SHELL_NEWLINE)
 
                     # broadcast_batch_file.writelines(ffmpeg_command)
@@ -243,20 +243,20 @@ class DaySchedule(object):
 
                     if n < len(hour_block) - 1:
                         n += 1
-            
+
             self.schedule_end_datetime = hour_scan_time
             self.shell_broadcast_path = batch_path
-        
+
         st = os.stat(self.shell_broadcast_path)
         os.chmod(self.shell_broadcast_path, st.st_mode | stat.S_IEXEC)
 
         self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
         self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
-        
+
         for series_key in series_counts.keys():
             self.log_message("Saving popped playlist for {0}".format(series_key))
             m3u_reader_collection[series_key].save_popped_playlist()       
-                
+
     def log_message(self, message="Hello, developer!", level="info"):
         if level not in ("info", "warn", "error"):
             level = datetime.now().strftime("%I:%M %p")

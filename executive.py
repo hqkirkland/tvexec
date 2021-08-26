@@ -3,6 +3,7 @@ import os
 import random
 import stat
 import subprocess
+import time
 
 import natsort
 
@@ -37,7 +38,7 @@ class DaySchedule(object):
             self.log_message("Unable to locate required lineup or series configuration files.", "error")
 
     def set_datetimes(self, schedule_start_datetime=None):
-        if schedule_start_datetime is None:
+        if schedule_start_datetime is None or "":
             self.schedule_date = datetime.today().date()
             self.schedule_start_datetime = datetime.today()
             self.schedule_end_datetime = datetime.today().replace(hour=23, minute=59, second=59)
@@ -279,34 +280,46 @@ print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░�
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░░░░░░░░░")
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 
-schedule = DaySchedule()
+startup_datetime_in = input(">> Enter Start Time (%I:%M:%S %p): ")
+begin_time = None
+
+while begin_time == None:
+    try:
+        begin_time = datetime.strptime(startup_datetime_in, "%I:%M:%S %p").time()
+    except:
+        print(">> Invalid time: {0}".format(startup_datetime_in))
+        continue
+
+if startup_datetime_in == "" or begin_time < datetime.today().time():
+    schedule = DaySchedule()
+else:
+    schedule_startup_time = datetime.combine(datetime.today().date(), begin_time)
+    schedule = DaySchedule(schedule_startup_time)
+
+    sleepdelta = schedule_startup_time - datetime.today()
+    schedule.log_message("Awaiting broadcast startup time: {0}; {1}s ".format(startup_datetime_in, sleepdelta.seconds), "WARN")
+    time.sleep(sleepdelta.seconds)
+
 schedule.gen_series_playlists()
 schedule.genday()
 schedule.validday()
 
-broadcast_start_key = input(">> Start today's broadcast (Y/N)?: ")
+if os.path.exists(schedule.shell_broadcast_path):
+    schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
 
-if broadcast_start_key == 'y':
+    for command in schedule.ffmpeg_commands:
+        ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
+        stdout, stderr = ffmpeg_subprocess.communicate()
+
+while True:
+    schedule = DaySchedule(schedule.schedule_end_datetime)
+    schedule.gen_series_playlists()
+    schedule.genday()
+    schedule.validday()
+
     if os.path.exists(schedule.shell_broadcast_path):
         schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
 
         for command in schedule.ffmpeg_commands:
             ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
             stdout, stderr = ffmpeg_subprocess.communicate()
-
-while True:
-    continue_key = input(">> Continue to next day (Y/N)?: ")
-    if continue_key == 'n':
-        break
-    else:
-        schedule = DaySchedule(schedule.schedule_end_datetime)
-        schedule.gen_series_playlists()
-        schedule.genday()
-        schedule.validday()
-
-        if os.path.exists(schedule.shell_broadcast_path):
-            schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
-
-            for command in schedule.ffmpeg_commands:
-                ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
-                stdout, stderr = ffmpeg_subprocess.communicate()

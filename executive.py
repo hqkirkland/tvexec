@@ -21,13 +21,6 @@ else:
 
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream"):
-        self.set_datetimes(schedule_start_datetime)
-        self.day_of_week = self.schedule_date.strftime('%A')
-        self.lineup = { }
-        self.rtmp_endpoint = rtmp_ept
-        self.shell_broadcast_path = ""
-        self.ffmpeg_commands = []
-
         try: 
             with open("lineup.json", "r") as lineup_file:
                 self.lineup_strdict = json.load(lineup_file)
@@ -35,18 +28,30 @@ class DaySchedule(object):
                 self.series_list = json.load(series_config_file)
 
         except Exception:
-            self.log_message("Unable to locate required lineup or series configuration files.", "error")
+            self.log_message("Unable to locate required lineup or series configuration files: lineup.json, series_config.json", "error")
+
+        self.gen_series_playlists()
+        self.set_datetimes(schedule_start_datetime)
+
+        self.day_of_week = self.schedule_date.strftime('%A')
+        self.lineup = { }
+        self.rtmp_endpoint = rtmp_ept
+        self.shell_broadcast_path = ""
+        self.ffmpeg_commands = []
 
     def set_datetimes(self, schedule_start_datetime=None):
-        if schedule_start_datetime is None or "":
-            self.schedule_date = datetime.today().date()
-            self.schedule_start_datetime = datetime.today()
-            self.schedule_end_datetime = datetime.today().replace(hour=23, minute=59, second=59)
-        else:
+        if schedule_start_datetime is not None and schedule_start_datetime > datetime.today():
+            self.log_message("Setting startup time to: {0}".format(schedule_start_datetime.strftime("%I:%M:%S %p")))
             self.schedule_date = schedule_start_datetime.date()
             # self.schedule_start_datetime = schedule_start_datetime.replace(hour=0, minute=0, second=0)
             self.schedule_start_datetime = schedule_start_datetime
             self.schedule_end_datetime =  schedule_start_datetime.replace(hour=23, minute=59, second=59)
+            return
+        else:
+            self.log_message("Time specified has already lapsed.", "WARN")
+            self.schedule_date = datetime.today().date()
+            self.schedule_start_datetime = datetime.today()
+            self.schedule_end_datetime = datetime.today().replace(hour=23, minute=59, second=59)
 
     def gen_series_playlists(self):
         for series_key in self.series_list.keys():
@@ -196,6 +201,7 @@ class DaySchedule(object):
 
         if os.path.exists(batch_path):
             os.remove(batch_path)
+
         with open(batch_path, "x") as broadcast_batch_file:
             while hour_scan_time < self.schedule_end_datetime:
                 hour_key = hour_scan_time.strftime("%I:00 %p")
@@ -266,8 +272,7 @@ class DaySchedule(object):
 
         print("[{0}] {1}".format(level.upper(), message))
 
-# Main script begin
-
+# Entrypoint
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
@@ -280,40 +285,37 @@ print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░�
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░░░░░░░░░")
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 
-startup_datetime_in = input(">> Enter Start Time (%I:%M:%S %p): ")
 begin_time = None
 
-while begin_time == None:
-    try:
-        begin_time = datetime.strptime(startup_datetime_in, "%I:%M:%S %p").time()
-    except:
-        print(">> Invalid time: {0}".format(startup_datetime_in))
-        continue
+try:
+    startup_datetime_in = input(">> Enter today's startup time (%I:%M:%S %p): ")
+    begin_time = datetime.strptime(startup_datetime_in, "%I:%M:%S %p").time()
+except:
+    print(">> Invalid time (must be HH:MM:SS AM/PM): {0}".format(startup_datetime_in))
+    print(">> Using datetime.today() ...")
+    begin_time = datetime.today().time()
 
-if startup_datetime_in == "" or begin_time < datetime.today().time():
-    schedule = DaySchedule()
-else:
-    schedule_startup_time = datetime.combine(datetime.today().date(), begin_time)
-    schedule = DaySchedule(schedule_startup_time)
+schedule_startup_time = datetime.combine(datetime.today().date(), begin_time)
+schedule = DaySchedule(schedule_startup_time)
 
-    sleepdelta = schedule_startup_time - datetime.today()
-    schedule.log_message("Awaiting broadcast startup time: {0}; {1}s ".format(startup_datetime_in, sleepdelta.seconds), "WARN")
-    time.sleep(sleepdelta.seconds)
-
-schedule.gen_series_playlists()
 schedule.genday()
 schedule.validday()
 
-if os.path.exists(schedule.shell_broadcast_path):
-    schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
+sleepdelta = schedule_startup_time - datetime.today()
+schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
+time.sleep(sleepdelta.seconds)
 
-    for command in schedule.ffmpeg_commands:
-        ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
-        stdout, stderr = ffmpeg_subprocess.communicate()
+# if os.path.exists(schedule.shell_broadcast_path):
+    # schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
+
+schedule.log_message("Starting schedule up..")
+
+for command in schedule.ffmpeg_commands:
+    ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
+    stdout, stderr = ffmpeg_subprocess.communicate()
 
 while True:
     schedule = DaySchedule(schedule.schedule_end_datetime)
-    schedule.gen_series_playlists()
     schedule.genday()
     schedule.validday()
 

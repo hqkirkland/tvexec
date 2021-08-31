@@ -4,6 +4,7 @@ class M3UReader:
     def __init__(self, m3u_file_path, series_key=None):
         self.playlist_entries = []
         self.m3u_file_path = m3u_file_path
+        self.m3u_cursor = 0
 
         if not os.path.isfile(m3u_file_path):
             return
@@ -32,11 +33,15 @@ class M3UReader:
                             "entry_title": episode_title,
                             "m3u_duration": episode_len,
                             "file_path": os.path.normpath(episode_file_path),
-                    })
-    
-    def pop_next_playlist_entry(self):
-        next_playlist_entry = self.playlist_entries.pop(0)
-        self.playlist_entries.append(next_playlist_entry)
+                        })
+
+    def read_next_playlist_entry(self, pop=True):
+        if pop:
+            next_playlist_entry = self.playlist_entries.pop(0)
+            self.playlist_entries.append(next_playlist_entry)
+        else:
+            next_playlist_entry = self.playlist_entries[self.m3u_cursor]
+            self.m3u_cursor += 1
         return next_playlist_entry
     
     def save_popped_playlist(self):
@@ -44,10 +49,14 @@ class M3UReader:
             os.remove(self.m3u_file_path)
         with open(self.m3u_file_path, "x") as series_m3u:
             series_m3u.writelines(("#EXTM3U" + '\n',))
-            i = 0
+            # Reset the cursor.
+            # If we've been poppin', 
+            # then the cursor will start at the *next* unaired episode of series.
+            # Else, cursor will start at today's first episode of series.
+            self.m3u_cursor = 0
             for entry in self.playlist_entries:
-                episode_title = "{0} - {1}".format(i, entry["entry_title"])
+                episode_title = entry["entry_title"]
                 episode_title = "#EXTINF:{0},{1}\n".format(str(int(entry["m3u_duration"])), episode_title)
                 
                 series_m3u.writelines((episode_title, entry["file_path"] + '\n\n'))
-                i += 1
+                self.m3u_cursor += 1

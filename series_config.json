@@ -1,6 +1,6 @@
 {
     "Dilbert": {
-        "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward corporate world.",
+        "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward, corporate world.",
         "rootDirectory": "/home/hunter/NetLibrary/Dilbert/"
     },
     "Fawlty Towers": {
@@ -11,8 +11,8 @@
         "description": "A radio psychiatrist moves back to his hometown of Seattle, Washington only to find himself mixed up in the personal chaos of family, friends, and self.",
         "rootDirectory": "/home/hunter/NetLibrary/Frasier/"
     },
-    "Fullmetal Alchemist: Brotherood": {
-        "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to return to their original forms.",
+    "Fullmetal Alchemist: Brotherhood": {
+        "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to restore their bodies.",
         "rootDirectory": "/home/hunter/NetLibrary/Fullmetal/",
         "ffmpegFilterFlags": "-map 0:2 -map \"[overlay_out]\" -filter_complex \"[0:s:1][0:v:0]scale2ref[sub_out][vid_out];[vid_out][sub_out]overlay[overlay_out]\""
     },

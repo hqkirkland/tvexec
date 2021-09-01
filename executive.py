@@ -18,7 +18,7 @@ else:
 
 
 class DaySchedule(object):
-    def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream"):
+    def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream", pop_entries=True):
         try: 
             with open("lineup.json", "r") as lineup_file:
                 self.lineup_strdict = json.load(lineup_file)
@@ -27,18 +27,19 @@ class DaySchedule(object):
 
         except Exception:
             self.log_message("Unable to locate required lineup or series configuration files: lineup.json, series_config.json", "error")
-
+        
         self.gen_series_playlists()
         self.set_datetimes(schedule_start_datetime)
 
+        self.pop_entries = pop_entries
         self.day_of_week = self.schedule_date.strftime('%A')
         self.lineup = { }
         self.rtmp_endpoint = rtmp_ept
-        self.shell_broadcast_path = ""
+        self.broadcast_lineup_path = ""
         self.ffmpeg_commands = []
 
     def set_datetimes(self, schedule_start_datetime=None):
-        if schedule_start_datetime is not None and schedule_start_datetime > datetime.today():
+        if schedule_start_datetime is not None and schedule_start_datetime > datetime.now():
             self.log_message("Setting startup time to: {0}".format(schedule_start_datetime.strftime("%I:%M:%S %p")))
             self.schedule_date = schedule_start_datetime.date()
             # self.schedule_start_datetime = schedule_start_datetime.replace(hour=0, minute=0, second=0)
@@ -47,9 +48,9 @@ class DaySchedule(object):
             return
         else:
             self.log_message("Time specified has already lapsed.", "WARN")
-            self.schedule_date = datetime.today().date()
-            self.schedule_start_datetime = datetime.today()
-            self.schedule_end_datetime = datetime.today().replace(hour=23, minute=59, second=59)
+            self.schedule_date = datetime.now().date()
+            self.schedule_start_datetime = datetime.now()
+            self.schedule_end_datetime = datetime.now().replace(hour=23, minute=59, second=59)
 
     def gen_series_playlists(self):
         for series_key in self.series_list.keys():
@@ -68,9 +69,6 @@ class DaySchedule(object):
 
                     dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
                     files_in_seriespath = [os.path.normpath(f) for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
-
-                    # Is dir sort necessary if all files get natsorted by end?
-                    # dirs_in_seriespath = natsort.natsorted(dirs_in_seriespath)
 
                     # This next condition likely means that the directory is split by season.
                     if len(dirs_in_seriespath) > len(files_in_seriespath):
@@ -176,7 +174,7 @@ class DaySchedule(object):
         for hour_key in self.lineup_strdict[self.day_of_week].keys():
             block = self.lineup_strdict[self.day_of_week][hour_key]
 
-            for n in range(0, len(block)): 
+            for n in range(0, len(block)):                   
                 series_key = block[n]
                 series = self.series_list[series_key]
                 path_to_series = os.path.normpath(series["rootDirectory"])
@@ -222,7 +220,7 @@ class DaySchedule(object):
 
                     scan_series = hour_block[n]
                     scan_series_data = self.series_list[scan_series]
-                    scan_entry = m3u_reader_collection[scan_series].read_next_playlist_entry()
+                    scan_entry = m3u_reader_collection[scan_series].read_next_playlist_entry(pop=self.pop_entries)
 
                     scan_entry_length =  timedelta(seconds=int(scan_entry["m3u_duration"]))
                     scan_entry_file = scan_entry["file_path"]
@@ -233,8 +231,6 @@ class DaySchedule(object):
                     self.log_message(lineup_line_entry.strip())
                     broadcast_lineup_outfile.writelines([lineup_line_entry,])
 
-                    self.lineup[hour_scan_time.strftime("%A %I:%M:%S %p")] = { "file_path": scan_entry_file, "end_time": entry_end_time }
-
                     filter_flags = ""
                     realtime_flag = "-re"
                     # -preset veryfast
@@ -244,9 +240,16 @@ class DaySchedule(object):
                         filter_flags = scan_series_data["ffmpegFilterFlags"]
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
-
+                    
                     ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
-                    self.ffmpeg_commands.append(ffmpeg_command)
+
+                    self.lineup[hour_scan_time.strftime("%A %I:%M:%S %p")] = { 
+                        "file_path": scan_entry_file, 
+                        "end_time": entry_end_time,
+                        "ffmpeg_command": ffmpeg_command
+                    }
+
+                    # self.ffmpeg_commands.append(ffmpeg_command)
 
                     hour_scan_time = entry_end_time
 
@@ -254,17 +257,15 @@ class DaySchedule(object):
                         n += 1
 
             self.schedule_end_datetime = hour_scan_time
-            self.shell_broadcast_path = lineup_info_path
+            self.broadcast_lineup_path = lineup_info_path
 
-        st = os.stat(self.shell_broadcast_path)
-        os.chmod(self.shell_broadcast_path, st.st_mode | stat.S_IEXEC)
-
-        self.log_message("{0} created for: {1} ".format(self.shell_broadcast_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
+        self.log_message("{0} created for: {1} ".format(self.broadcast_lineup_path, schedule.schedule_date.strftime("%A %m/%d/%Y") ) )
         self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
 
         for series_key in series_counts.keys():
-            self.log_message("Saving popped playlist for {0}".format(series_key))
-            m3u_reader_collection[series_key].save_popped_playlist()
+            if self.pop_entries:
+                self.log_message("Saving popped playlist for {0}".format(series_key))
+                m3u_reader_collection[series_key].save_popped_playlist()
 
     def log_message(self, message="Hello, developer!", level="info"):
         if level not in ("info", "warn", "error"):
@@ -283,8 +284,8 @@ print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░�
 print("░░▓▓▒▒░░▒▒▒▒▒▒▒▒░░▒▒▓▓░░TELEVISION░░░░░░░░░░")
 print("░░▓▓▒▒▒▒░░░░░░░░▒▒▒▒▓▓░░E X E C U T I V E░░░")
 print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
-print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░")
-print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░By Nodebay░░░░░░░░░░")
+print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░August Test Release░")
+print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░by Nodebay░░░░░░░░░░")
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 
 begin_time = None
@@ -301,37 +302,50 @@ try:
     begin_time = datetime.strptime(startup_datetime_in, "%I:%M:%S %p").time()
 except:
     print(">> Invalid time (must be HH:MM:SS AM/PM): {0}".format(startup_datetime_in))
-    print(">> Using datetime.today() ...")
-    begin_time = datetime.today().time()
+    print(">> Using datetime.now() ...")
+    begin_time = datetime.now().time()
 
-schedule_startup_time = datetime.combine(datetime.today().date(), begin_time)
-schedule = DaySchedule(schedule_startup_time)
+if broadcast_option == "n":
+    pop_playlist_entries = False
+else:
+    pop_playlist_entries = True
+schedule_startup_time = datetime.combine(datetime.now().date(), begin_time)
+schedule = DaySchedule(schedule_startup_time, pop_entries=pop_playlist_entries)
 
 schedule.genday()
 schedule.validday()
 
 if broadcast_option == "y":
-    sleepdelta = schedule_startup_time - datetime.today()
-    schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
-    time.sleep(sleepdelta.seconds)
+    if schedule_startup_time > datetime.now():
+        sleepdelta = schedule_startup_time - datetime.now()
+        schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
+        time.sleep(sleepdelta.seconds)
 
-    schedule.log_message("Starting schedule up..")
+    if os.path.exists(schedule.broadcast_lineup_path):
+        schedule.log_message("Starting lineup: {0}".format(schedule.broadcast_lineup_path ) )
 
     # TODO: Assemble commands on-the-fly by reading from schedule.lineup
-    for command in schedule.ffmpeg_commands:
-        ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
+    for entry in schedule.lineup.keys():
+        ffmpeg_subprocess = subprocess.Popen(schedule.lineup[entry]["ffmpeg_command"], shell=True, cwd=os.curdir)
         stdout, stderr = ffmpeg_subprocess.communicate()
 
     while True:
-        schedule = DaySchedule(schedule.schedule_end_datetime)
+        schedule_startup_time = schedule.schedule_end_datetime
+
+        schedule = DaySchedule(schedule_startup_time)
         schedule.genday()
         schedule.validday()
 
-        if os.path.exists(schedule.shell_broadcast_path):
-            schedule.log_message("Starting {0}".format(schedule.shell_broadcast_path ) )
+        if schedule_startup_time > datetime.now():
+            sleepdelta = schedule_startup_time - datetime.now()
+            schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
+            time.sleep(sleepdelta.seconds)
 
-            for command in schedule.ffmpeg_commands:
-                ffmpeg_subprocess = subprocess.Popen(command, shell=True, cwd=os.curdir)
-                stdout, stderr = ffmpeg_subprocess.communicate()
+        if os.path.exists(schedule.broadcast_lineup_path):
+            schedule.log_message("Starting lineup: {0}".format(schedule.broadcast_lineup_path ) )
+
+        for entry in schedule.lineup.keys():
+            ffmpeg_subprocess = subprocess.Popen(schedule.lineup[entry]["ffmpeg_command"], shell=True, cwd=os.curdir)
+            stdout, stderr = ffmpeg_subprocess.communicate()
 else:
     exit()

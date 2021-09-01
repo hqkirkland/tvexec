@@ -1,3 +1,4 @@
+from enum import IntFlag
 import os
 
 class M3UReader:
@@ -39,11 +40,14 @@ class M3UReader:
         if pop:
             next_playlist_entry = self.playlist_entries.pop(0)
             self.playlist_entries.append(next_playlist_entry)
-        else:
+        elif self.m3u_cursor < len(self.playlist_entries):
             next_playlist_entry = self.playlist_entries[self.m3u_cursor]
             self.m3u_cursor += 1
+        else:
+            self.m3u_cursor = 0
+            next_playlist_entry = self.playlist_entries[self.m3u_cursor]
         return next_playlist_entry
-    
+
     def save_popped_playlist(self):
         if os.path.isfile(self.m3u_file_path):
             os.remove(self.m3u_file_path)

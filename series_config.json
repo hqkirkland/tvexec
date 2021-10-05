@@ -1,11 +1,15 @@
 {
+    "Airbender": {
+        "description": "Water. Earth. Fire. Air. Long ago, the four nations lived together in harmony. Then, everything changed when the Fire Nation attacked.",
+        "rootDirectory": "/home/hunter/NetLibrary/Airbender/"
+    },
     "Dilbert": {
         "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward, corporate world.",
         "rootDirectory": "/home/hunter/NetLibrary/Dilbert/"
     },
     "Fawlty Towers": {
         "description": "Basil Fawlty's hotel, and his marriage to Sibyl, are in dire need of new management.",
-	"rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/"
+	    "rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/"
     },
     "Frasier": {
         "description": "A radio psychiatrist moves back to his hometown of Seattle, Washington only to find himself mixed up in the personal chaos of family, friends, and self.",
@@ -30,7 +34,7 @@
         "rootDirectory": "/home/hunter/NetLibrary/MST3K/"
     },
     "Peep Show": {
-        "description": "Flatmates Mark and Jez are far from being the \"odd couple\" of London. They're a lot more troubled.",
+        "description": "Flatmates Mark and Jez are far from being the \"odd couple\" of London. They're a lot odder.",
         "rootDirectory": "/home/hunter/NetLibrary/Peep_Show/"
     },
     "Star Trek: Deep Space 9": {
@@ -41,6 +45,10 @@
         "description": "These are the voyages of the starship 'Enterprise.' Its continuing mission: to explore strange, new world; to seek out new life and new civilizations; to boldly go where no one has gone before!",
         "rootDirectory": "/home/hunter/NetLibrary/Star Trek TNG/"
     },
+    "Star Wars": {
+        "description": "OG Star Wars is the only Star Wars for me.", 
+        "rootDirectory": "/home/hunter/NetLibrary/Star_Wars_Trilogy/"
+    },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",
         "rootDirectory": "/home/hunter/NetLibrary/Sifl_and_Olly"
@@ -48,5 +56,9 @@
     "Taxi": {
         "description": "This seminal 1980s TV sitcom is about the life and times of a group of New York City's finest taxi drivers.",
         "rootDirectory": "/home/hunter/NetLibrary/Taxi/"
+    },
+    "That Mitchell & Webb Look": {
+        "description": "UK comedians David Mitchell & Robert Webb put on a sketch show!",
+        "rootDirectory": "/home/hunter/NetLibrary/TMWL/"
     }
 }

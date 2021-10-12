@@ -27,7 +27,7 @@ class DaySchedule(object):
 
         except Exception:
             self.log_message("Unable to locate required lineup or series configuration files: lineup.json, series_config.json", "error")
-        
+
         self.gen_series_playlists()
         self.set_datetimes(schedule_start_datetime)
 
@@ -93,7 +93,7 @@ class DaySchedule(object):
                             self.log_message("> Shuffling playlist for: {0}".format(series_key))
                             random.shuffle(files_in_series)
 
-                    for episode_file in files_in_series:                        
+                    for episode_file in files_in_series:
                         path_to_episode_file = os.path.normpath(os.path.join(subdir_season_path, episode_file))
                         self.log_message("Episode path: {0}".format(path_to_episode_file))
 
@@ -113,16 +113,16 @@ class DaySchedule(object):
                                                 path_to_episode_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                         clean_result = result.stdout.strip().split(b'\r')[0]
                         self.log_message("Result: {0}".format(clean_result))
-                        
+
                         try:
                             episode_len = float(clean_result)
                         except ValueError:
                             episode_len = 0.0
 
                         self.log_message("> {0} duration is {1}s".format(episode_file_name[0], str(int(episode_len))))
+
                         episode_title = episode_file_name[0].replace("_", " ")
                         episode_title_line = "#EXTINF:{0},{1} - {2}".format(str(int(episode_len)), series_key, episode_title)
-                        
                         series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))
 
     def genday(self):
@@ -132,7 +132,7 @@ class DaySchedule(object):
         for hour in range(0, 24):
             slot_hour = slot_hour.replace(hour=hour)
             hour_key = datetime.strftime(slot_hour, "%I:00 %p")
-            
+
             if hour_key not in self.lineup_strdict[self.day_of_week]:
                 slot_hour = slot_hour.replace(hour=hour - 1)
                 prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
@@ -142,7 +142,7 @@ class DaySchedule(object):
             else:
                 blocks = self.lineup_strdict[self.day_of_week][hour_key]
                 for n in range(0, len(blocks)):
-                    if blocks[n] == "":                            
+                    if blocks[n] == "":
                         if n == 0 and hour != 0:
                             # prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                             # slot_hour = slot_hour
@@ -174,7 +174,7 @@ class DaySchedule(object):
         for hour_key in self.lineup_strdict[self.day_of_week].keys():
             block = self.lineup_strdict[self.day_of_week][hour_key]
 
-            for n in range(0, len(block)):                   
+            for n in range(0, len(block)):
                 series_key = block[n]
                 series = self.series_list[series_key]
                 path_to_series = os.path.normpath(series["rootDirectory"])
@@ -226,7 +226,7 @@ class DaySchedule(object):
                     scan_entry_file = scan_entry["file_path"]
 
                     entry_end_time = hour_scan_time + scan_entry_length
-                    
+
                     lineup_line_entry = "{0} - {1} | {2} : {3}{4}".format(hour_scan_time.strftime("%I:%M:%S %p"), entry_end_time.strftime("%I:%M:%S %p"), hour_key, scan_entry_file, SHELL_NEWLINE)
                     self.log_message(lineup_line_entry.strip())
                     broadcast_lineup_outfile.writelines([lineup_line_entry,])
@@ -240,7 +240,7 @@ class DaySchedule(object):
                         filter_flags = scan_series_data["ffmpegFilterFlags"]
                         output_flags = "-crf 28 {0}".format(output_flags)
                         realtime_flag = ""
-                    
+
                     ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
 
                     self.lineup[hour_scan_time.strftime("%A %I:%M:%S %p")] = { 

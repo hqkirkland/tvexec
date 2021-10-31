@@ -16,6 +16,7 @@ if os.name == "nt":
 else:
     SHELL_NEWLINE = '\n'
 
+EXTENSIONS_ALLOWED = ("mkv", "avi", "mp4", "m4a", "wav", "mp3", "mpg", "")
 
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream", pop_entries=True):
@@ -54,8 +55,7 @@ class DaySchedule(object):
 
     def gen_series_playlists(self):
         for series_key in self.series_list.keys():
-            self.log_message("Generating M3U playlist for {0}".format(series_key))
-            extensions_allowed = ("mkv", "avi", "mp4", "m4a", "wav", "mp3", "")
+            self.log_message("Checking M3U playlist for {0}".format(series_key))
             series = self.series_list[series_key]
             path_to_series = os.path.normpath(series["rootDirectory"])
             if os.path.exists(path_to_series):
@@ -65,6 +65,7 @@ class DaySchedule(object):
                     continue
 
                 with open(path_to_m3u, "x") as series_m3u:
+                    self.log_message("Building M3U playlist for {0}".format(series_key))
                     series_m3u.writelines(("#EXTM3U" + '\n',))
 
                     dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
@@ -104,7 +105,7 @@ class DaySchedule(object):
                         else:
                             episode_file_extension = episode_file_name[1]
 
-                        if episode_file_extension not in extensions_allowed:
+                        if episode_file_extension not in EXTENSIONS_ALLOWED:
                             self.log_message("> Skipping: {0}".format(path_to_episode_file))
                             continue
 

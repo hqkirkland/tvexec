@@ -18,6 +18,7 @@
     "Fullmetal Alchemist: Brotherhood": {
         "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to restore their bodies.",
         "rootDirectory": "/home/hunter/NetLibrary/Fullmetal/",
+        "outputFlags": "-b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -c:a aac -channel_layout 5.1 -g 15 -strict experimental",
         "ffmpegFilterFlags": "-map 0:2 -map \"[overlay_out]\" -filter_complex \"[0:s:1][0:v:0]scale2ref[sub_out][vid_out];[vid_out][sub_out]overlay[overlay_out]\""
     },
     "King of the Hill": {
@@ -47,7 +48,8 @@
     },
     "Star Wars": {
         "description": "OG Star Wars is the only Star Wars for me.", 
-        "rootDirectory": "/home/hunter/NetLibrary/Star_Wars_Trilogy/"
+        "rootDirectory": "/home/hunter/NetLibrary/Star_Wars_Trilogy/",
+        "outputFlags": "-b:v 16M -crf 32 -vcodec libx264 -preset ultrafast -c:a aac -b:a 128k "
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",

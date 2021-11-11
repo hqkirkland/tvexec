@@ -235,12 +235,21 @@ class DaySchedule(object):
                     filter_flags = ""
                     realtime_flag = "-re"
                     # -preset veryfast
-                    output_flags = "-vcodec libx264 -c:a aac -b:a 400k -channel_layout 5.1 -g 15 -strict experimental -f flv {0}".format(self.rtmp_endpoint)
+
+                    if "outputFlags" in scan_series_data:
+                        override_output_flags = scan_series_data["outputFlags"]
+                        str(override_output_flags).replace('\r', '')
+                        str(override_output_flags).replace('\n', '')
+                        output_flags = "{0} -f flv {1}".format(override_output_flags, self.rtmp_endpoint)
+                    
+                    else:
+                        output_flags = "-vcodec libx264 -c:a aac -b:a 400k -strict experimental -f flv {0}".format(self.rtmp_endpoint)
 
                     if "ffmpegFilterFlags" in scan_series_data:
                         filter_flags = scan_series_data["ffmpegFilterFlags"]
-                        output_flags = "-crf 28 {0}".format(output_flags)
-                        realtime_flag = ""
+                        str(filter_flags).replace('\r', '')
+                        str(filter_flags).replace('\n', '')
+                        # realtime_flag = ""
 
                     ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
 
@@ -311,12 +320,12 @@ if broadcast_option == "n":
 else:
     pop_playlist_entries = True
 schedule_startup_time = datetime.combine(datetime.now().date(), begin_time)
-schedule = DaySchedule(schedule_startup_time, pop_entries=pop_playlist_entries)
 
-schedule.genday()
-schedule.validday()
+while True:
+    schedule = DaySchedule(schedule_startup_time, pop_entries=pop_playlist_entries)
+    schedule.genday()
+    schedule.validday()
 
-if broadcast_option == "y":
     if schedule_startup_time > datetime.now():
         sleepdelta = schedule_startup_time - datetime.now()
         schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
@@ -325,28 +334,10 @@ if broadcast_option == "y":
     if os.path.exists(schedule.broadcast_lineup_path):
         schedule.log_message("Starting lineup: {0}".format(schedule.broadcast_lineup_path ) )
 
-    # TODO: Assemble commands on-the-fly by reading from schedule.lineup
-    for entry in schedule.lineup.keys():
-        ffmpeg_subprocess = subprocess.Popen(schedule.lineup[entry]["ffmpeg_command"], shell=True, cwd=os.curdir)
-        stdout, stderr = ffmpeg_subprocess.communicate()
-
-    while True:
-        schedule_startup_time = schedule.schedule_end_datetime
-
-        schedule = DaySchedule(schedule_startup_time)
-        schedule.genday()
-        schedule.validday()
-
-        if schedule_startup_time > datetime.now():
-            sleepdelta = schedule_startup_time - datetime.now()
-            schedule.log_message("Sleeping until: {0} for {1}s ".format(schedule_startup_time.strftime("%A, %I:%M:%S %p"), sleepdelta.seconds), "INFO")
-            time.sleep(sleepdelta.seconds)
-
-        if os.path.exists(schedule.broadcast_lineup_path):
-            schedule.log_message("Starting lineup: {0}".format(schedule.broadcast_lineup_path ) )
-
+    if broadcast_option == "y":
         for entry in schedule.lineup.keys():
             ffmpeg_subprocess = subprocess.Popen(schedule.lineup[entry]["ffmpeg_command"], shell=True, cwd=os.curdir)
             stdout, stderr = ffmpeg_subprocess.communicate()
-else:
-    exit()
+        schedule_startup_time = schedule.schedule_end_datetime
+    else:
+        exit()

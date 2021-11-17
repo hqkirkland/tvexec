@@ -241,9 +241,9 @@ class DaySchedule(object):
                         str(override_output_flags).replace('\r', '')
                         str(override_output_flags).replace('\n', '')
                         output_flags = "{0} -f flv {1}".format(override_output_flags, self.rtmp_endpoint)
-                    
+
                     else:
-                        output_flags = "-vcodec libx264 -c:a aac -b:a 400k -strict experimental -f flv {0}".format(self.rtmp_endpoint)
+                        output_flags = "-vcodec libx264 -c:a aac -b:a 400k -channel_layout 5.1 -g 15 -strict experimental -f flv {0}".format(self.rtmp_endpoint)
 
                     if "ffmpegFilterFlags" in scan_series_data:
                         filter_flags = scan_series_data["ffmpegFilterFlags"]

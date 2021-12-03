@@ -1,4 +1,3 @@
-from enum import IntFlag
 import os
 
 class M3UReader:
@@ -7,10 +6,9 @@ class M3UReader:
         self.m3u_file_path = m3u_file_path
         self.m3u_cursor = 0
 
-        if not os.path.isfile(m3u_file_path):
+        if not os.path.isfile(self.m3u_file_path):
             return
         
-        self.m3u_file_path = m3u_file_path
         with open(self.m3u_file_path, "r+") as series_m3u:
             m3u_lines = series_m3u.readlines()                    
             for i in range(0, len(m3u_lines)):
@@ -35,7 +33,7 @@ class M3UReader:
                             "m3u_duration": episode_len,
                             "file_path": os.path.normpath(episode_file_path),
                         })
-
+    
     def read_next_playlist_entry(self, pop=True):
         if pop:
             next_playlist_entry = self.playlist_entries.pop(0)

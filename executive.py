@@ -1,22 +1,17 @@
 import json
 import os
-import random
-import stat
 import subprocess
 import time
 
-import natsort
-
+from M3UBuilder import M3UBuilder
 from M3UReader import M3UReader
 from datetime import datetime, timedelta
-from optparse import OptionParser
+# from optparse import OptionParser
 
 if os.name == "nt":
     SHELL_NEWLINE = '\r\n'
 else:
     SHELL_NEWLINE = '\n'
-
-EXTENSIONS_ALLOWED = ("mkv", "avi", "mp4", "m4a", "wav", "mp3", "mpg", "")
 
 class DaySchedule(object):
     def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream", pop_entries=True):
@@ -57,79 +52,18 @@ class DaySchedule(object):
         for series_key in self.series_list.keys():
             self.log_message("Checking M3U playlist for {0}".format(series_key))
             series = self.series_list[series_key]
-            path_to_series = os.path.normpath(series["rootDirectory"])
-            if os.path.exists(path_to_series):
-                m3u_safe_series_key = series_key.replace(':', ' ')
-                path_to_m3u = os.path.join(path_to_series, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
-                if (os.path.exists(path_to_m3u)):
-                    continue
+            series_playlist_type = series["playlistType"] if "playlistType" in series else ""
+                        
+            series_m3u_builder = M3UBuilder(series_key, os.path.normpath(series["rootDirectory"]))
 
-                with open(path_to_m3u, "x") as series_m3u:
-                    self.log_message("Building M3U playlist for {0}".format(series_key))
-                    series_m3u.writelines(("#EXTM3U" + '\n',))
-
-                    dirs_in_seriespath = [os.path.normpath(d) for d in os.listdir(path_to_series) if os.path.isdir(os.path.join(path_to_series, d))]
-                    files_in_seriespath = [os.path.normpath(f) for f in os.listdir(path_to_series) if os.path.isfile(os.path.join(path_to_series, f))]
-
-                    # This next condition likely means that the directory is split by season.
-                    if len(dirs_in_seriespath) > len(files_in_seriespath):
-                        files_in_series = ()
-                        for subdir in dirs_in_seriespath:
-                            subdir_season_path = os.path.normpath(os.path.join(path_to_series, subdir))
-                            self.log_message("> Navigating into: {0}".format(subdir_season_path))
-                            for season_episode in os.listdir(subdir_season_path):
-                                self.log_message("> Adding {0}".format(season_episode))
-                                path_to_episode_file = os.path.join(subdir_season_path, season_episode)
-                                if os.path.isfile(path_to_episode_file):
-                                    files_in_series = files_in_series + (path_to_episode_file,)
-                    else:
-                        subdir_season_path = path_to_series
-                        files_in_series = files_in_seriespath
-
-                    # Sort files last.
-                    files_in_series = natsort.natsorted(files_in_series)
-
-                    if "playlistType" in series:
-                        if series["playlistType"] == "shuffle":
-                            self.log_message("> Shuffling playlist for: {0}".format(series_key))
-                            random.shuffle(files_in_series)
-
-                    for episode_file in files_in_series:
-                        path_to_episode_file = os.path.normpath(os.path.join(subdir_season_path, episode_file))
-                        self.log_message("Episode path: {0}".format(path_to_episode_file))
-
-                        episode_file_name = os.path.basename(path_to_episode_file).split('.')
-
-                        if len(episode_file_name) > 2:
-                            episode_file_extension = episode_file_name[len(episode_file_name) - 1]
-                        else:
-                            episode_file_extension = episode_file_name[1]
-
-                        if episode_file_extension not in EXTENSIONS_ALLOWED:
-                            self.log_message("> Skipping: {0}".format(path_to_episode_file))
-                            continue
-
-                        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                                                "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", 
-                                                path_to_episode_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                        clean_result = result.stdout.strip().split(b'\r')[0]
-                        self.log_message("Result: {0}".format(clean_result))
-
-                        try:
-                            episode_len = float(clean_result)
-                        except ValueError:
-                            episode_len = 0.0
-
-                        self.log_message("> {0} duration is {1}s".format(episode_file_name[0], str(int(episode_len))))
-
-                        episode_title = episode_file_name[0].replace("_", " ")
-                        episode_title_line = "#EXTINF:{0},{1} - {2}".format(str(int(episode_len)), series_key, episode_title)
-                        series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))
+            if os.path.exists(series_m3u_builder.series_path):
+                series_m3u_builder.build(series_playlist_type)
 
     def genday(self):
         self.log_message("Generating schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
         slot_hour = self.schedule_start_datetime
         slot_hour = slot_hour.replace(hour=0, minute=0, second=0)
+        
         for hour in range(0, 24):
             slot_hour = slot_hour.replace(hour=hour)
             hour_key = datetime.strftime(slot_hour, "%I:00 %p")

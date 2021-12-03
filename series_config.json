@@ -1,7 +1,16 @@
 {
+    "The Adventures of Tintin": {
+        "description": "Belgian journalist Tintin and his fuzzy pal Snowy travel the modern world, meeting friends and defeating foes.",
+        "rootDirectory": "/home/hunter/NetLibrary/The Adventures of Tintin/"
+    },
     "Airbender": {
         "description": "Water. Earth. Fire. Air. Long ago, the four nations lived together in harmony. Then, everything changed when the Fire Nation attacked.",
         "rootDirectory": "/home/hunter/NetLibrary/Airbender/"
+    },
+    "Bumps": {
+        "description": "Like Adult Swim's but with more.. vapor.",
+        "rootDirectory": "/home/hunter/NetLibrary/K409 Bumps/",
+        "playlistType": "shuffle"
     },
     "Dilbert": {
         "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward, corporate world.",
@@ -9,7 +18,8 @@
     },
     "Fawlty Towers": {
         "description": "Basil Fawlty's hotel, and his marriage to Sibyl, are in dire need of new management.",
-	    "rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/",
+	    "rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/"
+    },
     "Frasier": {
         "description": "A radio psychiatrist moves back to his hometown of Seattle, Washington only to find himself mixed up in the personal chaos of family, friends, and self.",
         "rootDirectory": "/home/hunter/NetLibrary/Frasier/"
@@ -29,13 +39,27 @@
         "rootDirectory": "/home/hunter/NetLibrary/Movies/",
         "playlistType": "shuffle"
     },
+    "Music": {
+        "description": "Music.",
+        "rootDirectory": "/home/hunter/NetLibrary/K409 Music/",
+        "playlistType": "shuffle"
+    },
     "MST3K": {
         "description": "Held hostage by villainous corporate captors and forced to watch awful mystery and sci-fi movies, the host and his robot pals make the best of their cringey situation with riffs, jokes, and memes.",
         "rootDirectory": "/home/hunter/NetLibrary/MST3K/"
     },
     "Peep Show": {
         "description": "Flatmates Mark and Jez are far from being the \"odd couple\" of London. They're a lot odder.",
-        "rootDirectory": "/home/hunter/NetLibrary/Peep_Show/"
+        "rootDirectory": "/home/hunter/NetLibrary/Peep Show/"
+    },
+    "Specials": {
+        "description": "Special Programming, curated by the K409 team.",
+        "rootDirectory": "/home/hunter/NetLibrary/K409 Specials/",
+        "playlistType": "shuffle"
+    },
+    "Stargate SG-1": {
+        "description": "SG-1 is Earth's best chance at exploring and securing the Stargate network, which link distant worlds across the galaxy.",
+        "rootDirectory": "/home/hunter/NetLibrary/Stargate SG-1/" 
     },
     "Star Trek: Deep Space 9": {
         "description": "A mixed team of Federation and Bajoran crew members operate the distant space station safeguarding the newly-discovered wormhole to the unexplored Gamma Quadrant of our galaxy.",
@@ -47,19 +71,23 @@
     },
     "Star Wars": {
         "description": "OG Star Wars is the only Star Wars for me.", 
-        "rootDirectory": "/home/hunter/NetLibrary/Star_Wars_Trilogy/",
+        "rootDirectory": "/home/hunter/NetLibrary/Star Wars Trilogy/",
         "outputFlags": "-b:v 16M -crf 32 -vcodec libx264 -preset ultrafast -c:a aac -b:a 128k "
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",
-        "rootDirectory": "/home/hunter/NetLibrary/Sifl_and_Olly/"
+        "rootDirectory": "/home/hunter/NetLibrary/Sifl and Olly/"
     },
     "Taxi": {
-        "description": "This seminal 1980s TV sitcom is about the life and times of a group of New York City's finest taxi drivers.",
+        "description": "This seminal 1980s TV sitcom is about the life and times of a group of New York City's finest.. taxi drivers.",
         "rootDirectory": "/home/hunter/NetLibrary/Taxi/"
     },
     "That Mitchell & Webb Look": {
         "description": "UK comedians David Mitchell & Robert Webb put on a sketch show!",
         "rootDirectory": "/home/hunter/NetLibrary/TMWL/"
+    },
+    "Tom and Jerry": {
+        "description": "A timeless classic: a cat and mouse play home-wrecking games of cat and mouse.",
+        "rootDirectory": "/home/hunter/NetLibrary/Tom and Jerry/"
     }
 }

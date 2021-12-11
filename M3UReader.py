@@ -20,12 +20,12 @@ class M3UReader:
                     # Start M3U Entry Cursor @ 1
                 
                 if m3u_line.startswith("#EXTINF"):
-                    m3u_segments = m3u_line.split(',')
-
-                    length_segment = m3u_segments[0].split(':')[1]
+                    m3u_segments = m3u_line.split(':', 1)[1].split(',')
+                    length_segment = m3u_segments[0]
+                    
                     episode_len = int(length_segment)
                     episode_file_path = m3u_lines[i + 1].strip()
-                    episode_title = os.path.basename(episode_file_path)
+                    episode_title = m3u_segments[1]
 
                     if os.path.isfile(episode_file_path):
                         self.playlist_entries.append({
@@ -49,6 +49,7 @@ class M3UReader:
     def save_popped_playlist(self):
         if os.path.isfile(self.m3u_file_path):
             os.remove(self.m3u_file_path)
+        
         with open(self.m3u_file_path, "x") as series_m3u:
             series_m3u.writelines(("#EXTM3U" + '\n',))
             # Reset the cursor.

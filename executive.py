@@ -42,6 +42,7 @@ class DaySchedule(object):
             self.schedule_start_datetime = schedule_start_datetime
             self.schedule_end_datetime =  schedule_start_datetime.replace(hour=23, minute=59, second=59)
             return
+
         else:
             self.log_message("Time specified has already lapsed.", "WARN")
             self.schedule_date = datetime.now().date()
@@ -53,8 +54,8 @@ class DaySchedule(object):
             self.log_message("Checking M3U playlist for {0}".format(series_key))
             series = self.series_list[series_key]
             series_playlist_type = series["playlistType"] if "playlistType" in series else ""
-                        
-            series_m3u_builder = M3UBuilder(series_key, os.path.normpath(series["rootDirectory"]))
+            
+            series_m3u_builder = M3UBuilder(os.path.normpath(series["rootDirectory"]), series_key)
 
             if os.path.exists(series_m3u_builder.series_path):
                 series_m3u_builder.build(series_playlist_type)
@@ -127,7 +128,7 @@ class DaySchedule(object):
 
             path_to_series = os.path.normpath(series["rootDirectory"])
 
-            m3u_safe_series_key = series_key.replace(':', ' ')
+            m3u_safe_series_key = series_key.replace(':', '')
             path_to_m3u = os.path.join(path_to_series, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
 
             new_m3u_reader = M3UReader ( path_to_m3u, series_key )
@@ -157,12 +158,13 @@ class DaySchedule(object):
                     scan_series_data = self.series_list[scan_series]
                     scan_entry = m3u_reader_collection[scan_series].read_next_playlist_entry(pop=self.pop_entries)
 
+                    scan_entry_title = scan_entry["entry_title"]
                     scan_entry_length =  timedelta(seconds=int(scan_entry["m3u_duration"]))
                     scan_entry_file = scan_entry["file_path"]
 
                     entry_end_time = hour_scan_time + scan_entry_length
 
-                    lineup_line_entry = "{0} - {1} | {2} : {3}{4}".format(hour_scan_time.strftime("%I:%M:%S %p"), entry_end_time.strftime("%I:%M:%S %p"), hour_key, scan_entry_file, SHELL_NEWLINE)
+                    lineup_line_entry = "{0} - {1} | {2} : {3}{4}".format(hour_scan_time.strftime("%I:%M:%S %p"), entry_end_time.strftime("%I:%M:%S %p"), hour_key, scan_entry_title, SHELL_NEWLINE)
                     self.log_message(lineup_line_entry.strip())
                     broadcast_lineup_outfile.writelines([lineup_line_entry,])
 

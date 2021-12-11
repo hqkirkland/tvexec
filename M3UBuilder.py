@@ -6,10 +6,10 @@ import subprocess
 EXTENSIONS_ALLOWED = ("mkv", "avi", "mp4", "m4a", "m4v", "wav", "mp3", "mpg", "")
 
 class M3UBuilder:
-    def __init__(self, series_key, series_root_directory):
+    def __init__(self, series_root_directory, series_key):
         self.series_key = series_key
         self.series_path = os.path.normpath(series_root_directory)
-        m3u_safe_series_key = self.series_key.replace(':', ' ')
+        m3u_safe_series_key = self.series_key.replace(':', '')
         self.m3u_path = os.path.join(self.series_path, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
 
     def build(self, series_playlist_type=""):
@@ -53,9 +53,9 @@ class M3UBuilder:
 
                 # print("> {0} duration is {1}s".format(episode_file_name[0], str(int(episode_len))))
 
-                # Remove file extension.
+                # Remove file extension + extra chars.
                 episode_title = episode_file_name.replace(".{0}".format(episode_file_extension), "")
-                episode_title = episode_title.replace("_", " ").replace(".", " ")
+                episode_title = episode_title.replace("_", " ").replace(".", " ").replace(":", "")
 
                 if episode_file_extension not in EXTENSIONS_ALLOWED:
                     # print("> Skipping: {0}".format(path_to_episode_file))
@@ -72,6 +72,7 @@ class M3UBuilder:
                 except ValueError:
                     episode_len = 0.0
 
+                episode_title_line.replace(self.series_key, "", 1)
                 episode_title_line = "#EXTINF:{0},{1} - {2}".format(str(int(episode_len)), self.series_key, episode_title)
                 print(">> {0}".format(episode_title_line))
                 series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))

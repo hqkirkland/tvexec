@@ -72,7 +72,6 @@ class M3UBuilder:
                 except ValueError:
                     episode_len = 0.0
 
-                episode_title_line.replace(self.series_key, "", 1)
                 episode_title_line = "#EXTINF:{0},{1} - {2}".format(str(int(episode_len)), self.series_key, episode_title)
                 print(">> {0}".format(episode_title_line))
                 series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))

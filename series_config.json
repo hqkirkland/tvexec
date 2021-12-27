@@ -39,6 +39,10 @@
         "rootDirectory": "/home/hunter/NetLibrary/Movies/",
         "playlistType": "shuffle"
     },
+    "Mr. Bean": {
+        "description": "Mr. Bean is an English fellow living his best life in the only ways he knows how.",
+        "rootDirectory": "/home/hunter/NetLibrary/Mr. Bean/"
+    },
     "Music": {
         "description": "Music.",
         "rootDirectory": "/home/hunter/NetLibrary/K409 Music/",
@@ -66,13 +70,13 @@
         "rootDirectory": "/home/hunter/NetLibrary/Star Trek DS9/"
     },
     "Star Trek: The Next Generation": {
-        "description": "These are the voyages of the starship 'Enterprise.' Its continuing mission: to explore strange, new world; to seek out new life and new civilizations; to boldly go where no one has gone before!",
+        "description": "These are the voyages of the starship 'Enterprise.' Its continuing mission: to explore strange, new worlds; to seek out new life and new civilizations; to boldly go where no one has gone before!",
         "rootDirectory": "/home/hunter/NetLibrary/Star Trek TNG/"
     },
     "Star Wars": {
-        "description": "OG Star Wars is the only Star Wars for me.", 
+        "description": "Thanks to the 4K77 team and Harmy's Despecializers, these are the least-altered, highest-definition copies of the Star Wars Original Trilogy available to the public since the original box office releases.", 
         "rootDirectory": "/home/hunter/NetLibrary/Star Wars Trilogy/",
-        "outputFlags": "-b:v 16M -crf 32 -vcodec libx264 -preset ultrafast -c:a aac -b:a 128k "
+        "outputFlags": " -b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -preset ultrafast -c:a aac -b:a 320k -channel_layout 5.1 -g 15 -strict experimental"
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",
@@ -89,5 +93,10 @@
     "Tom and Jerry": {
         "description": "A timeless classic: a cat and mouse play home-wrecking games of cat and mouse.",
         "rootDirectory": "/home/hunter/NetLibrary/Tom and Jerry/"
+    },
+    "Vintage Nature": {
+        "description": "Nature is timeless.",
+        "rootDirectory": "/home/hunter/NetLibrary/Vintage Nature/",
+        "playlistType": "shuffle"
     }
 }

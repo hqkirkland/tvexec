@@ -55,7 +55,17 @@ if broadcast_option == "y":
         schedule.planlineup()
         schedule.genhour()
 
-        now_next_later =  schedule.lineup
+        planner = LineupPlanner(schedule_start_datetime=schedule.schedule_start_datetime)
+        planner.planhours()
+        planner.planlineup()
+
+        now_next_later =  [planner.lineup[k]["block_entry"] for k in planner.lineup.keys()]
+        
+        if os.path.exists("/mnt/comingup.txt"):
+            os.remove("/mnt/comingup.txt")
+        
+        with open("/mnt/comingup.txt", "x") as now_next_later_outfile:
+            now_next_later_outfile.writelines("{0}".format(now_next_later))
 
         if schedule_startup_time > datetime.now():
             sleepdelta = schedule_startup_time - datetime.now()
@@ -72,10 +82,6 @@ if broadcast_option == "y":
         
         schedule_startup_time = schedule.schedule_end_datetime
 else:
-    plan_min3_end3hours = LineupPlanner(schedule_end_datetime=datetime.now() + timedelta(hours=3))
-    plan_min3_end3hours.planhours()
-    plan_min3_end3hours.planlineup()
-    
-    plan_min10_start3hours = LineupPlanner(schedule_start_datetime=plan_min3_end3hours.schedule_end_datetime, min_entries=10)
-    plan_min10_start3hours.planhours()
-    plan_min10_start3hours.planlineup()
+    plan_min10 = LineupPlanner(schedule_start_datetime=datetime.now().replace(hour=23), min_entries=10)
+    plan_min10.planhours()
+    plan_min10.planlineup()

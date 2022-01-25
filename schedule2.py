@@ -43,7 +43,6 @@ class HourSchedule(object):
             return
 
         else:
-            self.log_message("Ready to begin; starting broadcast now..", "INFO")
             self.schedule_date = datetime.now().date()
             self.schedule_start_datetime = datetime.now()
             # self.schedule_end_datetime = datetime.now().replace(hour=23, minute=59, second=59)

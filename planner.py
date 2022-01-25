@@ -79,14 +79,14 @@ class LineupPlanner(object):
         return None
 
     def planlineup(self):
-        # Enter each hour for this day.
         hour_scan_time = self.schedule_start_datetime
-        lineup_info_path = "plan_{0}_{1}.txt".format(self.schedule_date.strftime("%Y%m%d_%I%M%S"), len(self.lineup))
-        lineup_info_path = os.path.join(os.curdir, lineup_info_path)
-
         m3u_reader_collection = { }
         self.series_counts = {}
 
+        lineup_info_path = "plan_latest.txt"
+        lineup_info_path = os.path.join(os.curdir, lineup_info_path)
+       
+        # Enter each hour for this day.
         for hour_key in self.lineup_strdict[self.day_of_week].keys():
             block = self.lineup_strdict[self.day_of_week][hour_key]
 
@@ -153,7 +153,7 @@ class LineupPlanner(object):
                     broadcast_lineup_outfile.writelines([lineup_line_entry,])
                     
                     self.lineup[hour_scan_time.strftime("%A %I:%M:%S %p")] = { 
-                        "block_entry": series_key,
+                        "block_entry": scan_series,
                         "file_path": scan_entry_file,
                         "end_time": entry_end_time.strftime("%A %I:%M:%S %p")
                     }

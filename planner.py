@@ -10,8 +10,8 @@ if os.name == "nt":
 else:
     SHELL_NEWLINE = '\n'
 
-class HourSchedule(object):
-    def __init__(self, schedule_start_datetime=None, rtmp_ept="rtmp://127.0.0.1/show/stream", pop_entries=True):
+class LineupPlanner(object):
+    def __init__(self, min_entries=3, pop_entries=False, schedule_start_datetime=None, schedule_end_datetime=None):
         try: 
             with open("lineup.json", "r") as lineup_file:
                 self.lineup_strdict = json.load(lineup_file)
@@ -21,47 +21,35 @@ class HourSchedule(object):
         except Exception:
             self.log_message("Unable to locate required lineup or series configuration files: lineup.json, series_config.json", "error")
 
-        self.gen_series_playlists()
-        self.set_datetimes(schedule_start_datetime)
+        self.set_datetimes(schedule_start_datetime, schedule_end_datetime)
 
+        self.min_entries = min_entries
         self.pop_entries = pop_entries
         self.day_of_week = self.schedule_date.strftime('%A')
         self.lineup = { }
         self.series_counts = { }
-        self.m3u_reader_collection = { }
-        self.rtmp_endpoint = rtmp_ept
-        self.broadcast_lineup_path = ""
-        self.ffmpeg_commands = []
 
-    def set_datetimes(self, schedule_start_datetime=None):
+        self.broadcast_lineup_path = ""
+        
+    def set_datetimes(self, schedule_start_datetime=None, schedule_end_datetime=None):
         if schedule_start_datetime is not None and schedule_start_datetime > datetime.now():
             self.log_message("Setting startup time to: {0}".format(schedule_start_datetime.strftime("%I:%M:%S %p")))
             self.schedule_date = schedule_start_datetime.date()
             self.schedule_start_datetime = schedule_start_datetime
-            # self.schedule_end_datetime =  schedule_start_datetime.replace(hour=23, minute=59, second=59)
-            self.schedule_end_datetime =  datetime.now().replace(minute=59, second=59)
+            self.schedule_end_datetime =  schedule_start_datetime.replace(hour=23, minute=59, second=59)
             return
 
         else:
-            self.log_message("Ready to begin; starting broadcast now..", "INFO")
             self.schedule_date = datetime.now().date()
             self.schedule_start_datetime = datetime.now()
-            # self.schedule_end_datetime = datetime.now().replace(hour=23, minute=59, second=59)
-            self.schedule_end_datetime =  datetime.now().replace(minute=59, second=59, microsecond=0)
+            self.schedule_end_datetime = datetime.now().replace(hour=23, minute=59, second=59)
+        
+        if schedule_end_datetime is not None:
+            if schedule_end_datetime > self.schedule_start_datetime:
+                self.schedule_end_datetime = schedule_end_datetime
 
-    def gen_series_playlists(self):
-        for series_key in self.series_list.keys():
-            self.log_message("Checking M3U playlist for {0}".format(series_key))
-            series = self.series_list[series_key]
-            series_playlist_type = series["playlistType"] if "playlistType" in series else ""
-            
-            series_m3u_builder = M3UBuilder(os.path.normpath(series["rootDirectory"]), series_key)
-
-            if os.path.exists(series_m3u_builder.series_path):
-                series_m3u_builder.build(series_playlist_type)
-
-    def planlineup(self):
-        self.log_message("Normalizing lineup, the time is now: {0}".format(self.schedule_start_datetime.strftime("%c")))
+    def planhours(self):
+        self.log_message("Generating schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
         slot_hour = self.schedule_start_datetime
         slot_hour = slot_hour.replace(hour=0, minute=0, second=0)
         
@@ -73,37 +61,30 @@ class HourSchedule(object):
                 slot_hour = slot_hour.replace(hour=hour - 1)
                 prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
                 blocks = self.lineup_strdict[self.day_of_week][prev_hour_key]
-                self.log_message("Hour {0} does not exist for {1}; Repeating: Hour {2}".format(hour_key, self.day_of_week, prev_hour_key), "warn")
 
             else:
                 blocks = self.lineup_strdict[self.day_of_week][hour_key]
                 for n in range(0, len(blocks)):
                     if blocks[n] == "":
                         if n == 0 and hour != 0:
-                            # prev_hour_key = datetime.strftime(slot_hour, "%I:00 %p")
-                            # slot_hour = slot_hour
                             prev_hour_key = datetime.strftime(slot_hour.replace(hour=hour - 1), "%I:00 %p")
-                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), prev_hour_key, str(n)), "warn")
                             blocks[n] = self.lineup_strdict[self.day_of_week][prev_hour_key][n]
                         elif n == 0 and hour == 0:
-                            self.log_message("Hour 0 is empty; midnight slot *must* be set not-null, for now.", "error")
                             exit()
                         elif n != 0:
-                            self.log_message("Hour {0}, Block {1} is empty; Repeating: Hour {2}, Block {3}".format(hour, str(n), hour_key, str(n - 1)), "warn")
                             blocks[n] = self.lineup_strdict[self.day_of_week][hour_key][n - 1]
 
             self.lineup_strdict[self.day_of_week][hour_key] = blocks
 
         return None
 
-    def genhour(self):
+    def planlineup(self):
         # Enter each hour for this day.
         hour_scan_time = self.schedule_start_datetime
-        lineup_info_path = "broadcast_{0}.txt".format(self.schedule_date.strftime("%Y%m%d"))
+        lineup_info_path = "plan_{0}_{1}.txt".format(self.schedule_date.strftime("%Y%m%d_%I%M%S"), len(self.lineup))
         lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
-        self.log_message("Finalizing schedule for {0}".format(self.schedule_start_datetime.strftime("%c")))
-
+        m3u_reader_collection = { }
         self.series_counts = {}
 
         for hour_key in self.lineup_strdict[self.day_of_week].keys():
@@ -120,7 +101,7 @@ class HourSchedule(object):
                     self.series_counts.update({ series_key: 1 })
 
         for series_key in self.series_counts.keys():
-            if series_key in self.m3u_reader_collection.keys():
+            if series_key in m3u_reader_collection.keys():
                 continue
 
             series = self.series_list[series_key]
@@ -131,11 +112,16 @@ class HourSchedule(object):
             path_to_m3u = os.path.join(path_to_series, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
 
             new_m3u_reader = M3UReader ( path_to_m3u, series_key )
-            self.m3u_reader_collection.update({ series_key: new_m3u_reader })
+            m3u_reader_collection.update({ series_key: new_m3u_reader })
 
-        with open(lineup_info_path, "a") as broadcast_lineup_outfile:
-            while hour_scan_time < self.schedule_end_datetime:
+        if os.path.exists(lineup_info_path):
+            os.remove(lineup_info_path)
+
+        with open(lineup_info_path, "x") as broadcast_lineup_outfile:
+            entry_num = self.min_entries
+            while len(self.lineup) < entry_num:
                 hour_key = hour_scan_time.strftime("%I:00 %p")
+                self.day_of_week = hour_scan_time.strftime("%A")
                 # HH:??
                 hour_start_time = hour_scan_time
                 # HH:59
@@ -146,70 +132,48 @@ class HourSchedule(object):
                 hour_block = self.lineup_strdict[self.day_of_week][hour_key]
 
                 n = 0
-
-                broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(self.day_of_week, datetime.now().strftime("%I:%M %p"), SHELL_NEWLINE)])
-                
                 while hour_scan_time < hour_end_time:
-                    # Doesn't sem like this check is necessary anymore, given new frequency.
-                    # if hour_scan_time > self.schedule_end_datetime:
-                    #     break
-
+                    if len(self.lineup) >= entry_num:
+                        if hour_scan_time > self.schedule_end_datetime:
+                            break
+                        else:
+                            # This will allow previous loop to continue advancing.
+                            entry_num += 1
+                    
                     scan_series = hour_block[n]
-                    scan_series_data = self.series_list[scan_series]
-                    scan_entry = self.m3u_reader_collection[scan_series].read_next_playlist_entry(pop=self.pop_entries)
-
+                    scan_entry = m3u_reader_collection[scan_series].read_next_playlist_entry(pop=self.pop_entries)
+                    
                     scan_entry_title = scan_entry["entry_title"]
-                    scan_entry_length =  timedelta(seconds=int(scan_entry["m3u_duration"]))
+                    scan_entry_length = timedelta(seconds=int(scan_entry["m3u_duration"]))
                     scan_entry_file = scan_entry["file_path"]
 
                     entry_end_time = hour_scan_time + scan_entry_length
-                    
-                    lineup_line_entry = "{0} - {1} | {2} : {3}{4}".format(hour_scan_time.strftime("%I:%M:%S %p"), entry_end_time.strftime("%I:%M:%S %p"), hour_key, scan_entry_title, SHELL_NEWLINE)
-                    self.log_message(lineup_line_entry.strip())
+
+                    lineup_line_entry = "{0}-{1}: {2}{3}".format(hour_scan_time.strftime("%I:%M:%S %p"), entry_end_time.strftime("%I:%M:%S %p"), scan_entry_title, SHELL_NEWLINE)
                     broadcast_lineup_outfile.writelines([lineup_line_entry,])
-
-                    filter_flags = ""
-                    realtime_flag = "-re"
-                    # -preset veryfast
-
-                    if "outputFlags" in scan_series_data:
-                        override_output_flags = scan_series_data["outputFlags"]
-                        str(override_output_flags).replace('\r', '')
-                        str(override_output_flags).replace('\n', '')
-                        output_flags = "{0} -f flv {1}".format(override_output_flags, self.rtmp_endpoint)
-
-                    else:
-                        output_flags = "-vcodec libx264 -c:a aac -b:a 400k -channel_layout 5.1 -g 15 -strict experimental -f flv {0}".format(self.rtmp_endpoint)
-
-                    if "ffmpegFilterFlags" in scan_series_data:
-                        filter_flags = scan_series_data["ffmpegFilterFlags"]
-                        str(filter_flags).replace('\r', '')
-                        str(filter_flags).replace('\n', '')
-                        # realtime_flag = ""
-
-                    ffmpeg_command = "ffmpeg {0} -i \"{1}\" {2} {3}".format(realtime_flag, scan_entry_file, filter_flags, output_flags)
-
+                    
                     self.lineup[hour_scan_time.strftime("%A %I:%M:%S %p")] = { 
-                        "file_path": scan_entry_file, 
-                        "end_time": entry_end_time,
-                        "ffmpeg_command": ffmpeg_command
+                        "block_entry": series_key,
+                        "file_path": scan_entry_file,
+                        "end_time": entry_end_time.strftime("%A %I:%M:%S %p")
                     }
 
-                    # self.ffmpeg_commands.append(ffmpeg_command)
-
                     hour_scan_time = entry_end_time
-
+                    
+                    # Advance the block index.
                     if n < len(hour_block) - 1:
                         n += 1
             
             self.schedule_end_datetime = hour_scan_time
             self.broadcast_lineup_path = lineup_info_path
 
-    def savehour(self):
+        self.log_message("{0} created for: {1} ".format(self.broadcast_lineup_path, self.schedule_date.strftime("%A %m/%d/%Y") ) )
+        self.log_message("{0}'s lineup will terminate @ {1}".format(self.day_of_week, self.schedule_end_datetime))
+
         for series_key in self.series_counts.keys():
             if self.pop_entries:
                 self.log_message("Saving popped playlist for {0}".format(series_key))
-                self.m3u_reader_collection[series_key].save_popped_playlist()
+                m3u_reader_collection[series_key].save_popped_playlist()
 
     def log_message(self, message="Hello, developer!", level="info"):
         if level not in ("info", "warn", "error"):

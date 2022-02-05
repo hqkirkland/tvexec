@@ -38,6 +38,7 @@ class M3UReader:
         if pop:
             next_playlist_entry = self.playlist_entries.pop(0)
             self.playlist_entries.append(next_playlist_entry)
+            self.m3u_cursor = 0
         elif self.m3u_cursor < len(self.playlist_entries):
             next_playlist_entry = self.playlist_entries[self.m3u_cursor]
             self.m3u_cursor += 1

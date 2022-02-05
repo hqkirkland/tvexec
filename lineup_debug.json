@@ -15,9 +15,6 @@
         "12:00 AM": [""]
     },
     "Saturday": {
-        "12:00 AM": [""]
-    },
-    "Sunday": {
         "12:00 AM": ["MST3K", ""],
         "02:00 AM": ["MST3K", ""],
         "03:00 AM": ["Peep Show", "Mr. Bean", ""],
@@ -38,5 +35,8 @@
         "09:00 PM": ["Tom and Jerry", "Bumps"],
         "10:00 PM": ["The Adventures of Tintin", "Bumps", ""],
         "11:00 PM": ["MST3K", ""]
+    },
+    "Sunday": {
+        "12:00 AM": [""]
     }
 }

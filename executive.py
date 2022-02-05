@@ -82,18 +82,20 @@ while True:
         exit()
     
     slot_key = 0
-    slot_count = 0
     slot_entry = None
+    scan_hour = scan_datetime.hour
 
-    while scan_datetime < scan_end_datetime:
-        if slot_key > len(scheduler.lineup_calendar.read_block_by_datetime(plan_datetime)):
+    while scan_datetime < scan_end_datetime:       
+        if scan_hour != scan_datetime.hour:
+            scan_hour = scan_datetime.hour
             slot_key = 0
         
-        try_entry = scheduler.query_calendar(plan_datetime, slot_key)
+        elif slot_key > len(scheduler.lineup_calendar.read_block_by_datetime(scan_datetime)):
+            slot_key = 0
+
+        try_entry = scheduler.query_calendar(scan_datetime, slot_key)
+        slot_entry = try_entry
         
-        if try_entry is not None:
-            slot_entry = try_entry
-            
         scan_entry = M3UReader(scheduler.lineup_calendar.m3u_reader_collection[slot_entry]).read_next_playlist_entry(True)
 
         scan_entry_title = scan_entry["entry_title"]

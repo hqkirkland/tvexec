@@ -30,11 +30,19 @@ class StreamScheduler(object):
     
     def read_day(self, day_datetime):
         plan_datetime = day_datetime
+        current_hour = plan_datetime.hour
         slot_key = 0
+        
         day_queue = []
 
         while plan_datetime < day_datetime.replace(hour=23, minute=59, second=59):
-            if slot_key > len(self.lineup_calendar.read_block_by_datetime(plan_datetime)):
+            self.log_message("Entering {0} ".format(plan_datetime.strftime("%A %I:%M:%S %p")))
+            
+            if plan_datetime.hour != current_hour:
+                current_hour = plan_datetime.hour
+                slot_key = 0
+            
+            elif slot_key > len(self.lineup_calendar.read_block_by_datetime(plan_datetime)):
                 slot_key = 0
 
             try_entry = self.query_calendar(plan_datetime, slot_key)

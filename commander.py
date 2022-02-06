@@ -3,6 +3,7 @@ from lineup import LineupCalendar
 class FFMPEGCommander(object):
     def __init__(self, lineup_calendar: LineupCalendar, rtmp_ept="rtmp://127.0.0.1/show/stream"):
         self.lineup_calendar = lineup_calendar
+        self.rtmp_endpoint = rtmp_ept
     
     def build_cmd(self, series_key, file_path, duration):
         scan_series_data = self.lineup_calendar.series_list[series_key]

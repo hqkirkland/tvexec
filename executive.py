@@ -59,6 +59,7 @@ if schedule_startup_time > datetime.now():
 
 lineup = LineupCalendar()
 commander = FFMPEGCommander(lineup)
+
 scan_datetime = schedule_startup_time
 
 while True:
@@ -74,6 +75,7 @@ while True:
         day_of_week = DAYS_OF_WEEK[plan_datetime.weekday()]
         broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(day_of_week, plan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
         day_plan = scheduler.read_day(plan_datetime)
+
         for plan_entry in day_plan: 
             lineup_line_entry = "{0} - {1} | {2}{3}".format(plan_entry["start_datetime"].strftime("%I:%M:%S %p"), plan_entry["end_datetime"].strftime("%I:%M:%S %p"), plan_entry["file_path"], SHELL_NEWLINE)
             broadcast_lineup_outfile.writelines(lineup_line_entry)
@@ -83,9 +85,10 @@ while True:
     
     slot_key = 0
     slot_entry = None
+    
     scan_hour = scan_datetime.hour
-
-    while scan_datetime < scan_end_datetime:       
+    
+    while scan_datetime < scan_end_datetime:
         if scan_hour != scan_datetime.hour:
             scan_hour = scan_datetime.hour
             slot_key = 0
@@ -93,10 +96,20 @@ while True:
         elif slot_key > len(scheduler.lineup_calendar.read_block_by_datetime(scan_datetime)):
             slot_key = 0
 
-        try_entry = scheduler.query_calendar(scan_datetime, slot_key)
-        slot_entry = try_entry
+        if os.path.exists("now_next_later.txt"):
+            os.remove("now_next_later.txt")
         
-        scan_entry = M3UReader(scheduler.lineup_calendar.m3u_reader_collection[slot_entry]).read_next_playlist_entry(True)
+        with open("now_next_later.txt", "a") as now_next_later_file:
+            now_next_later = [ day_plan[0]["slot_entry"], day_plan[1]["slot_entry"], day_plan[2]["slot_entry"] ]
+            now_next_later_file.writelines("{0}{1}".format(json.dumps(now_next_later), SHELL_NEWLINE))
+
+        # Try to get new entry.
+        try_entry = scheduler.query_calendar(scan_datetime, slot_key)
+
+        if try_entry is not None:
+            slot_entry = try_entry
+
+        scan_entry = scheduler.lineup_calendar.m3u_reader_collection[slot_entry].read_next_playlist_entry(True)
 
         scan_entry_title = scan_entry["entry_title"]
         scan_entry_file = scan_entry["file_path"]
@@ -106,7 +119,8 @@ while True:
 
         ffmpeg_subprocess = subprocess.Popen(ffmpeg_command, shell=True, cwd=os.curdir)
         stdout, stderr = ffmpeg_subprocess.communicate()
-        scheduler.lineup_calendar.m3u_reader_collection[slot_entry].save_popped_playlist()
 
+        scheduler.lineup_calendar.m3u_reader_collection[slot_entry].save_popped_playlist()
+        day_plan.pop(0)
         slot_key += 1
         scan_datetime += scan_entry_length

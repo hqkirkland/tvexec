@@ -32,10 +32,10 @@ class StreamScheduler(object):
         plan_datetime = day_datetime
         current_hour = plan_datetime.hour
         slot_key = 0
-        
+
         day_queue = []
 
-        while plan_datetime < day_datetime.replace(hour=23, minute=59, second=59):
+        while plan_datetime < day_datetime + timedelta(hours=12):
             self.log_message("Entering {0} ".format(plan_datetime.strftime("%A %I:%M:%S %p")))
             
             if plan_datetime.hour != current_hour:
@@ -65,6 +65,10 @@ class StreamScheduler(object):
             
             slot_key += 1
             plan_datetime = plan_datetime + plan_entry_length
+        
+        # Reset the M3UReader cursors.
+        for series_key in self.lineup_calendar.m3u_reader_collection.keys():
+            self.lineup_calendar.m3u_reader_collection[series_key].m3u_cursor = 0
 
         return day_queue
 

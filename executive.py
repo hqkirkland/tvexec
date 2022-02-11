@@ -23,7 +23,7 @@ print("░░▓▓▒▒░░▒▒▒▒▒▒▒▒░░▒▒▓▓░░�
 print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▒▒░░▒▒▒▒▒▒▒▒░░▒▒▓▓░░TELEVISION░░░░░░░░░░")
 print("░░▓▓▒▒▒▒░░░░░░░░▒▒▒▒▓▓░░E X E C U T I V E░░░")
-print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░I I░(2.0)░░░░░░░░░░░")
+print("░░▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░")
 print("░░▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░by Nodebay░░░░░░░░░░")
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
@@ -65,43 +65,44 @@ scan_datetime = schedule_startup_time
 while True:
     scheduler = StreamScheduler(lineup)
     scan_end_datetime = scan_datetime.replace(minute=59, second=59)
-
     plan_datetime = scan_datetime
-    
-    lineup_info_path = "broadcast_debug_{0}.txt".format(scan_datetime.strftime("%Y%m%d"))
-    lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
-    with open(lineup_info_path, "a") as broadcast_lineup_outfile:
-        day_of_week = DAYS_OF_WEEK[plan_datetime.weekday()]
-        broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(day_of_week, plan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
-        day_plan = scheduler.read_day(plan_datetime)
-
-        for plan_entry in day_plan: 
-            lineup_line_entry = "{0} - {1} | {2}{3}".format(plan_entry["start_datetime"].strftime("%I:%M:%S %p"), plan_entry["end_datetime"].strftime("%I:%M:%S %p"), plan_entry["file_path"], SHELL_NEWLINE)
-            broadcast_lineup_outfile.writelines(lineup_line_entry)
-
-    if not do_broadcast:
-        exit()
-    
     slot_key = 0
     slot_entry = None
     
     scan_hour = scan_datetime.hour
     
     while scan_datetime < scan_end_datetime:
+        day_plan = scheduler.read_day(plan_datetime)
+        lineup_info_path = "broadcast_queue_{0}.txt".format(scan_datetime.strftime("%Y%m%d-%H_%M_%p"))
+        lineup_info_path = os.path.join(os.curdir, lineup_info_path)
+
+        if os.path.exists(lineup_info_path):
+            os.remove(lineup_info_path)
+        
+        with open(lineup_info_path, "w") as broadcast_lineup_outfile:
+            broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(DAYS_OF_WEEK[plan_datetime.weekday()], plan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
+        
+            for plan_entry in day_plan: 
+                lineup_line_entry = "{0} - {1} | {2}{3}".format(plan_entry["start_datetime"].strftime("%I:%M:%S %p"), plan_entry["end_datetime"].strftime("%I:%M:%S %p"), plan_entry["file_path"], SHELL_NEWLINE)
+                broadcast_lineup_outfile.writelines(lineup_line_entry)
+        
+        if os.path.exists("schedule.json"):
+            os.remove("schedule.json")
+        
+        with open("schedule.json", "x") as now_next_later_file:
+            now_next_later = [ day_plan[0]["slot_entry"], day_plan[1]["slot_entry"], day_plan[2]["slot_entry"] ]
+            now_next_later_file.writelines("{0}{1}".format(json.dumps(now_next_later), SHELL_NEWLINE))
+
+        if not do_broadcast:
+            exit()
+        
         if scan_hour != scan_datetime.hour:
             scan_hour = scan_datetime.hour
             slot_key = 0
         
         elif slot_key > len(scheduler.lineup_calendar.read_block_by_datetime(scan_datetime)):
             slot_key = 0
-
-        if os.path.exists("now_next_later.txt"):
-            os.remove("now_next_later.txt")
-        
-        with open("now_next_later.txt", "a") as now_next_later_file:
-            now_next_later = [ day_plan[0]["slot_entry"], day_plan[1]["slot_entry"], day_plan[2]["slot_entry"] ]
-            now_next_later_file.writelines("{0}{1}".format(json.dumps(now_next_later), SHELL_NEWLINE))
 
         # Try to get new entry.
         try_entry = scheduler.query_calendar(scan_datetime, slot_key)

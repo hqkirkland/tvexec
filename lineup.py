@@ -29,19 +29,17 @@ class LineupCalendar(object):
         lineup_filedict = self.load_lineup_file()
         lineup_strdict = self.normalize_lineup(lineup_filedict)
 
-        self.commit_lineup(lineup_strdict)
-        self.prepare_playlists()
+        if lineup_strdict is not None:
+            self.commit_lineup(lineup_strdict)
+            self.prepare_playlists()
     
     def load_lineup_file(self, refresh=False):
         # TODO: Before performing lineup refresh, checksum files for modifications.
-        #try:
+        # Hard fail for no series list file.
         with open("series_config.json", "r") as series_config_file:
             self.series_list = dict(json.load(series_config_file))
-        #except Exception:
-        #    self.log_message("Unable to locate or parse series configuration file: series_config.json", "error")
-        #    return None
         try:
-            with open("lineup_debug.json", "r") as lineup_file:
+            with open("lineup.json", "r") as lineup_file:
                 lineup_strdict = dict(json.load(lineup_file))
         except Exception:
             self.log_message("Unable to locate or parse required lineup file: lineup.json", "error")
@@ -53,6 +51,7 @@ class LineupCalendar(object):
         if not isinstance(lineup_strdict, dict):
             self.log_message("Expected instance of dict in argument, given is: {0}" \
                 .format(type(lineup_strdict)), "error")
+            return None
         
         saved_block = None
         for day in range(0, 7):
@@ -101,7 +100,7 @@ class LineupCalendar(object):
 
                 for s_key in range(0, slot_count):
 
-                    slot_entry = lineup_strdict[d_key][h_key][s_key]
+                    slot_entry = lineup_strdict[d_key][h_key][s_key].strip()
                     
                     if slot_entry not in self.series_list.keys():
                         self.log_message("Unable to locate \"{0}\" in lineup for {1} @ {2}, Slot #{3}".format(slot_entry, d_key, h_key, s_key))
@@ -111,11 +110,11 @@ class LineupCalendar(object):
                     if slot_entry == "" or slot_entry not in self.series_list.keys():
                         if s_key == 0:
                             if p_h == 23:
-                                lineup_strdict[d_key][h_key][s_key] = lineup_strdict[DAYS_OF_WEEK[p_d]][HOURS_OF_DAY[p_h]][-1]
+                                lineup_strdict[d_key][h_key][s_key] = lineup_strdict[DAYS_OF_WEEK[p_d]][HOURS_OF_DAY[p_h]][-1].strip()
                             else:
-                                lineup_strdict[d_key][h_key][s_key] = lineup_strdict[d_key][HOURS_OF_DAY[p_h]][-1]
+                                lineup_strdict[d_key][h_key][s_key] = lineup_strdict[d_key][HOURS_OF_DAY[p_h]][-1].strip()
                         else:
-                            lineup_strdict[d_key][h_key][s_key] = lineup_strdict[d_key][h_key][s_key - 1]
+                            lineup_strdict[d_key][h_key][s_key] = lineup_strdict[d_key][h_key][s_key - 1].strip()
                     slot_entry = None
         return lineup_strdict
 

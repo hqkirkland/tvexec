@@ -16,10 +16,6 @@ class StreamScheduler(object):
         self.rtmp_endpoint = rtmp_ept
         self.lineup_calendar = lineup_calendar
 
-    def refresh_lineup(self):
-        # Temporary. Eventually, build & use refresh capabilities of LineupCalendar class.
-        self.lineup_calendar = LineupCalendar()
-
     def query_calendar(self, query_datetime, slot_number):
         block = self.lineup_calendar.read_block_by_datetime(query_datetime)
         
@@ -42,7 +38,7 @@ class StreamScheduler(object):
                 current_hour = plan_datetime.hour
                 slot_key = 0
             
-            elif slot_key > len(self.lineup_calendar.read_block_by_datetime(plan_datetime)):
+            if slot_key > len(self.lineup_calendar.read_block_by_datetime(plan_datetime)):
                 slot_key = 0
 
             try_entry = self.query_calendar(plan_datetime, slot_key)

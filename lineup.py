@@ -15,6 +15,9 @@ else:
 DAY_KEYFMT = "%A"
 HOUR_KEYFMT = "%I:00 %p"
 DATETIME_OUT_FMT = "%A %I:%M:%S %p"
+LINEUP_FILENAME = "lineup.json"
+# LINEUP_FILENAME = "lineup_debug.json"
+SERIES_FILENAME = "series_config.json"
 
 # ISO Week, USA Hours.
 DAYS_OF_WEEK = [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ]
@@ -22,34 +25,66 @@ HOURS_OF_DAY = [ datetime.strftime(datetime.now().replace(hour=n), HOUR_KEYFMT) 
 
 class LineupCalendar(object):
     def __init__(self):
+        self.series_checksum = None
+        self.lineup_checksum = None
+        
         self.calendar = { k: { h: [] for h in HOURS_OF_DAY } for k in DAYS_OF_WEEK }
         self.m3u_reader_collection = { }
         self.series_list = { }
         
-        lineup_filedict = self.load_lineup_file()
-        lineup_strdict = self.normalize_lineup(lineup_filedict)
+        self.refresh()
+    
+    def refresh(self):
+        lineup_strdict = self.load_lineup_file()
 
         if lineup_strdict is not None:
             self.commit_lineup(lineup_strdict)
             self.prepare_playlists()
-    
-    def load_lineup_file(self, refresh=False):
+            return True
+        return False
+
+    def file_checksum(self, filename):
+        h = hashlib.sha1()
+
+        with open(filename, "rb") as file:
+            # Loop till the end of the file
+            chunk = 0
+            while chunk != b'':
+                # Read 1024 bytes at a time
+                chunk = file.read(1024)
+                h.update(chunk)
+                # TODO: Could chunks be passed to lineup/series file loader?
+
+        return h.hexdigest()
+
+    def load_lineup_file(self):
         # TODO: Before performing lineup refresh, checksum files for modifications.
         # Hard fail for no series list file.
-        with open("series_config.json", "r") as series_config_file:
-            self.series_list = dict(json.load(series_config_file))
-        try:
-            with open("lineup.json", "r") as lineup_file:
-                lineup_strdict = dict(json.load(lineup_file))
+        try:            
+            lineup_load_checksum = self.file_checksum(LINEUP_FILENAME)
+            
+            if lineup_load_checksum != self.lineup_checksum:
+                self.lineup_checksum = lineup_load_checksum
+                self.log_message("Checksum performed: lineup has been updated.")
+                with open(LINEUP_FILENAME, "r") as lineup_file:
+                    lineup_strdict = dict(json.load(lineup_file))
+            else:
+                return None
+            
+            series_load_checksum = self.file_checksum(SERIES_FILENAME)
+
+            if series_load_checksum != self.series_checksum:
+                self.series_checksum = series_load_checksum
+                self.log_message("Checksum performed: series index has been updated.")
+                with open(SERIES_FILENAME, "r") as series_config_file:
+                    self.series_list = dict(json.load(series_config_file))
+
         except Exception:
-            self.log_message("Unable to locate or parse required lineup file: lineup.json", "error")
+            self.log_message("Unable to locate, open, or parse required lineup or series file!", "error")
             return None
 
-        return lineup_strdict
-
-    def normalize_lineup(self, lineup_strdict):
         if not isinstance(lineup_strdict, dict):
-            self.log_message("Expected instance of dict in argument, given is: {0}" \
+            self.log_message("Failed to parse lineup file into dictionary: {0}" \
                 .format(type(lineup_strdict)), "error")
             return None
         

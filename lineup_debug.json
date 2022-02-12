@@ -12,7 +12,8 @@
         "12:00 AM": [""]
     },
     "Friday": {
-        "12:00 AM": [""]
+        "12:00 AM": ["Bumps", "Bumps", "Bumps", "Taxi"],
+        "01:00 AM": ["Frasier", "MST3K"]
     },
     "Saturday": {
         "12:00 AM": ["MST3K", ""],
@@ -21,8 +22,8 @@
         "05:00 AM": ["Frasier", ""],
         "06:00 AM": ["Stargate SG-1", ""],
         "07:00 AM": ["Star Trek: The Next Generation" , ""],
-        "08:00 AM": ["Fullmetal Alchemist: Brotherhood", ""],
-        "09:00 AM": ["Stargate SG-1", ""],
+        "08:00 AM": ["Bumps", ""],
+        "09:00 AM": ["Bumps", ""],
         "11:00 AM": ["Bumps", "", "Stargate SG-1"],
         "12:00 PM": ["Star Trek: The Next Generation", ""],
         "01:00 PM": ["Movies", ""],
@@ -31,12 +32,15 @@
         "05:00 PM": ["", ""],
         "06:00 PM": ["Dilbert", ""],
         "07:00 PM": ["Movies", ""],
-        "08:00 PM": ["Fullmetal Alchemist: Brotherhood", ""],
-        "09:00 PM": ["Tom and Jerry", "Bumps"],
-        "10:00 PM": ["The Adventures of Tintin", "Bumps", ""],
+        "08:00 PM": ["Bumps", ""],
+        "09:00 PM": ["Movies", ""],
+        "10:00 PM": ["MST3K", ""],
         "11:00 PM": ["MST3K", ""]
     },
     "Sunday": {
-        "12:00 AM": [""]
+        "12:00 AM": [""],
+        "08:00 AM": ["Bumps", ""],
+        "09:00 AM": ["Bumps", ""],
+        "10:00 AM": ["Bumps", ""]
     }
 }

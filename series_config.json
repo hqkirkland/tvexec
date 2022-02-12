@@ -12,6 +12,10 @@
         "rootDirectory": "/home/hunter/NetLibrary/K409 Bumps/",
         "playlistType": "shuffle"
     },
+    "Cosmos": {
+        "description": "Carl Sagan's 'Cosmos' is a personal voyage into the near and far scientific wonders of our past, present, and future.",
+        "rootDirectory": "/home/hunter/NetLibrary/Cosmos/"
+    },
     "Dilbert": {
         "description": "Based on the Sunday strip by Scott Adams, Dilbert is an irregular, awkward engineer competing in a regular, awkward, corporate world.",
         "rootDirectory": "/home/hunter/NetLibrary/Dilbert/"

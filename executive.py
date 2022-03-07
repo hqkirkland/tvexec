@@ -43,8 +43,14 @@ startup_datetime_in = input(">> Enter today's startup time (HH:MM:SS AM/PM): ")
 try:
     begin_time = datetime.strptime(startup_datetime_in, "%I:%M:%S %p").time()
 except:
-    print(">> Empty/invalid time (HH:MM:SS AM/PM)")
+    print(">> Empty/invalid time (HH:MM:SS AM/PM), using datetime.now().time()")
     begin_time = datetime.now().time()
+
+startup_slot = 0
+startup_slot_input = input(">> Startup slot number: ").strip()
+
+if startup_slot_input.isdigit():
+    startup_slot = int(startup_slot_input)
 
 schedule_startup_time = datetime.combine(datetime.now().date(), begin_time)
 
@@ -64,23 +70,22 @@ while True:
         commander.lineup_calendar = lineup
         scheduler.lineup_calendar = lineup
     
-    scan_end_datetime = scan_datetime.replace(minute=59, second=59)
-    plan_datetime = scan_datetime
-
-    slot_key = 0
+    slot_key = startup_slot
     slot_entry = None
-    scan_hour = scan_datetime.hour
     
+    scan_datetime = datetime.now()
+    scan_end_datetime = scan_datetime.replace(minute=59, second=59)
+
     while scan_datetime < scan_end_datetime:
-        day_plan = scheduler.read_day(plan_datetime)
-        lineup_info_path = "broadcast_queue_{0}.txt".format(scan_datetime.strftime("%Y%m%d_%H%p"))
+        day_plan = scheduler.read_day(scan_datetime, slot_key)
+        lineup_info_path = "broadcast_queue_{0}.txt".format(scan_datetime.strftime("%Y%m%d"))
         lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
-        if os.path.exists(lineup_info_path):
-            os.remove(lineup_info_path)
+        #if os.path.exists(lineup_info_path):
+            #os.remove(lineup_info_path)
         
-        with open(lineup_info_path, "x") as broadcast_lineup_outfile:
-            broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(DAYS_OF_WEEK[plan_datetime.weekday()], plan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
+        with open(lineup_info_path, "a") as broadcast_lineup_outfile:
+            broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(DAYS_OF_WEEK[scan_datetime.weekday()], scan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
         
             for plan_entry in day_plan: 
                 lineup_line_entry = "{0} - {1} | {2}{3}".format(plan_entry["start_datetime"].strftime("%I:%M:%S %p"), plan_entry["end_datetime"].strftime("%I:%M:%S %p"), plan_entry["file_path"], SHELL_NEWLINE)
@@ -95,14 +100,7 @@ while True:
 
         if not do_broadcast:
             exit()
-        
-        if scan_hour != scan_datetime.hour:
-            scan_hour = scan_datetime.hour
-            slot_key = 0
-        
-        elif slot_key > len(scheduler.lineup_calendar.read_block_by_datetime(scan_datetime)):
-            slot_key = 0
-        
+             
         # Try to get new entry.
         try_entry = scheduler.query_calendar(scan_datetime, slot_key)
 

@@ -12,39 +12,32 @@ else:
     SHELL_NEWLINE = '\n'
 
 class StreamScheduler(object):
-    def __init__(self, lineup_calendar: LineupCalendar, rtmp_ept="rtmp://127.0.0.1/show/stream"):
-        self.rtmp_endpoint = rtmp_ept
+    def __init__(self, lineup_calendar: LineupCalendar):
         self.lineup_calendar = lineup_calendar
 
     def query_calendar(self, query_datetime, slot_number):
         block = self.lineup_calendar.read_block_by_datetime(query_datetime)
         
-        if -1 < slot_number < len(block):
+        if slot_number >= len(block):
+            return str(block[-1])
+        elif slot_number > -1:
             return str(block[slot_number])
         else:
             return None
     
-    def read_day(self, day_datetime):
+    def read_day(self, day_datetime, slot_key=0):
         plan_datetime = day_datetime
-        current_hour = plan_datetime.hour
-        slot_key = 0
-
+        scan_hour = plan_datetime.hour
         day_queue = []
 
-        while plan_datetime < day_datetime + timedelta(hours=12):
+        while plan_datetime < day_datetime + timedelta(hours=6):
+            if scan_hour != plan_datetime.hour:
+                # Reset the slot key once we leave the hour.
+                slot_key = 0
+                scan_hour = plan_datetime.hour
             self.log_message("Entering {0} ".format(plan_datetime.strftime("%A %I:%M:%S %p")))
             
-            if plan_datetime.hour != current_hour:
-                current_hour = plan_datetime.hour
-                slot_key = 0
-            
-            if slot_key > len(self.lineup_calendar.read_block_by_datetime(plan_datetime)):
-                slot_key = 0
-
-            try_entry = self.query_calendar(plan_datetime, slot_key)
-            
-            if try_entry is not None:
-                slot_entry = try_entry
+            slot_entry = self.query_calendar(plan_datetime, slot_key)
             
             plan_entry = self.lineup_calendar.m3u_reader_collection[slot_entry].read_next_playlist_entry(False)
             plan_entry_length = timedelta(seconds=int(plan_entry["m3u_duration"]))

@@ -78,17 +78,29 @@ while True:
 
     while scan_datetime < scan_end_datetime:
         day_plan = scheduler.read_day(scan_datetime, slot_key)
-        lineup_info_path = "broadcast_queue_{0}.txt".format(scan_datetime.strftime("%Y%m%d"))
+        lineup_info_path = "lineup_{0}.txt".format(scan_datetime.strftime("%Y%m%d@%H_%M"))
         lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
         #if os.path.exists(lineup_info_path):
             #os.remove(lineup_info_path)
         
         with open(lineup_info_path, "a") as broadcast_lineup_outfile:
-            broadcast_lineup_outfile.writelines(["Broadcast Plan for {0} @ {1}{2}".format(DAYS_OF_WEEK[scan_datetime.weekday()], scan_datetime.strftime("%I:%M %p"), SHELL_NEWLINE)])
+            broadcast_lineup_outfile.writelines(
+                [
+                    "** LINEUP **", 
+                    SHELL_NEWLINE, 
+                    "{0} @ {1}{2}".format(DAYS_OF_WEEK[scan_datetime.weekday()], 
+                    scan_datetime.strftime("%I:%M %p"), 
+                    SHELL_NEWLINE)
+                ]
+            )
         
             for plan_entry in day_plan: 
-                lineup_line_entry = "{0} - {1} | {2}{3}".format(plan_entry["start_datetime"].strftime("%I:%M:%S %p"), plan_entry["end_datetime"].strftime("%I:%M:%S %p"), plan_entry["file_path"], SHELL_NEWLINE)
+                lineup_line_entry = "{0}: {2}{3}".format(
+                    plan_entry["start_datetime"].strftime("%I:%M %p"), 
+                    plan_entry["slot_entry"], 
+                    SHELL_NEWLINE
+                )
                 broadcast_lineup_outfile.writelines(lineup_line_entry)
         
         if os.path.exists("schedule.json"):

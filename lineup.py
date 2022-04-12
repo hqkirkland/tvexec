@@ -90,6 +90,9 @@ class LineupCalendar(object):
         
         saved_block = None
         for day in range(0, 7):
+            d_key = DAYS_OF_WEEK[day]
+            # if d_key not in lineup_strdict:
+                # lineup_strdict[d_key] = lineup_strdict[DAYS_OF_WEEK[day - 1]]
             for hour in range(0, 24):
                 
                 d_key = DAYS_OF_WEEK[day]

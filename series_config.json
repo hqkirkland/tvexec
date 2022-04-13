@@ -1,4 +1,8 @@
 {
+    "3rd Rock From the Sun": {
+        "description": "An extraterrestrial family of four is on a long-term expedition of Earth.",
+        "rootDirectory": "/home/hunter/NetLibrary/3rd Rock From the Sun/"
+    },
     "The Adventures of Tintin": {
         "description": "Belgian journalist Tintin and his fuzzy pal Snowy travel the modern world, meeting friends and defeating foes.",
         "rootDirectory": "/home/hunter/NetLibrary/The Adventures of Tintin/"
@@ -23,7 +27,7 @@
     "Fawlty Towers": {
         "description": "Basil Fawlty's hotel, and his marriage to Sibyl, are in dire need of new management.",
 	    "rootDirectory": "/home/hunter/NetLibrary/Fawlty Towers/"
-    },
+    }, 
     "Frasier": {
         "description": "A radio psychiatrist moves back to his hometown of Seattle, Washington only to find himself mixed up in the personal chaos of family, friends, and self.",
         "rootDirectory": "/home/hunter/NetLibrary/Frasier/"
@@ -38,6 +42,12 @@
         "description": "Hank Hill navigates life in the ever-changing Texas town of Arlen with his wife Peggy, son Bobby, and niece Luanne Platter, with the help of their friends and neighbors.",
         "rootDirectory": "/home/hunter/NetLibrary/King of the Hill/"
     },
+    "Lineup": {
+        "description": "Lineup.",
+        "rootDirectory": "/home/hunter/NetLibrary/K409 Lineups/",
+        "playlistType": "shuffle",
+        "ffmpegFilterFlags": "-vf \"drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/lineup.txt:x=(w-tw)/2:y=h-mod(t * 45\\, h + th):fontcolor=white:fontsize=32:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=black@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='YOU ARE WATCHING K409' : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\" -c:v libx264 -c:a aac "
+    },
     "Movies": {
         "description": "Movies. ",
         "rootDirectory": "/home/hunter/NetLibrary/Movies/",
@@ -46,11 +56,6 @@
     "Mr. Bean": {
         "description": "Mr. Bean is an English fellow living his best life in the only ways he knows how.",
         "rootDirectory": "/home/hunter/NetLibrary/Mr. Bean/"
-    },
-    "Music": {
-        "description": "Music.",
-        "rootDirectory": "/home/hunter/NetLibrary/K409 Music/",
-        "playlistType": "shuffle"
     },
     "MST3K": {
         "description": "Held hostage by villainous corporate captors and forced to watch awful mystery and sci-fi movies, the host and his robot pals make the best of their cringey situation with riffs, jokes, and memes.",
@@ -80,7 +85,7 @@
     "Star Wars": {
         "description": "Thanks to the 4K77 team and Harmy's Despecializers, these are the least-altered, highest-definition copies of the Star Wars Original Trilogy available to the public since the original box office releases.", 
         "rootDirectory": "/home/hunter/NetLibrary/Star Wars Trilogy/",
-        "outputFlags": " -b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -preset ultrafast -c:a aac -b:a 320k -channel_layout 5.1 -g 15 -strict experimental"
+        "outputFlags": " -b:v 56k -bufsize 56k -crf 31 -vcodec libx264 -preset ultrafast -c:a aac -b:a 320k -channel_layout 5.1 -g 15 -strict experimental"
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",

@@ -78,25 +78,25 @@ while True:
 
     while scan_datetime < scan_end_datetime:
         day_plan = scheduler.read_day(scan_datetime, slot_key)
-        lineup_info_path = "lineup_{0}.txt".format(scan_datetime.strftime("%Y%m%d@%H_%M"))
+        lineup_info_path = "lineup.txt"
+        # .format(scan_datetime.strftime("%Y%m%d@%H_%M"))
         lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
-        #if os.path.exists(lineup_info_path):
-            #os.remove(lineup_info_path)
-        
-        with open(lineup_info_path, "a") as broadcast_lineup_outfile:
+        with open(lineup_info_path, "w+t") as broadcast_lineup_outfile:
             broadcast_lineup_outfile.writelines(
                 [
-                    "** LINEUP **", 
-                    SHELL_NEWLINE, 
-                    "{0} @ {1}{2}".format(DAYS_OF_WEEK[scan_datetime.weekday()], 
-                    scan_datetime.strftime("%I:%M %p"), 
-                    SHELL_NEWLINE)
+                    "** LINEUP **",
+                    "{0}{1} @ {2}{3}".format(
+                        SHELL_NEWLINE,
+                        DAYS_OF_WEEK[scan_datetime.weekday()], 
+                        scan_datetime.strftime("%I:%M %p"), 
+                        SHELL_NEWLINE
+                    )
                 ]
             )
         
             for plan_entry in day_plan: 
-                lineup_line_entry = "{0}: {2}{3}".format(
+                lineup_line_entry = "{0}: {1}{2}".format(
                     plan_entry["start_datetime"].strftime("%I:%M %p"), 
                     plan_entry["slot_entry"], 
                     SHELL_NEWLINE
@@ -126,7 +126,7 @@ while True:
         scan_entry_length = timedelta(seconds=int(scan_entry["m3u_duration"]))
 
         ffmpeg_command = commander.build_cmd(slot_entry, scan_entry_file, scan_entry_length)
-
+        
         ffmpeg_subprocess = subprocess.Popen(ffmpeg_command, shell=True, cwd=os.curdir)
         stdout, stderr = ffmpeg_subprocess.communicate()
         

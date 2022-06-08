@@ -9,6 +9,7 @@ class M3UBuilder:
     def __init__(self, series_root_directory, series_key):
         self.series_key = series_key
         self.series_path = os.path.normpath(series_root_directory)
+        
         m3u_safe_series_key = self.series_key.replace(':', '')
         self.m3u_path = os.path.join(self.series_path, "{0}{1}".format(m3u_safe_series_key, ".m3u"))
 
@@ -60,7 +61,7 @@ class M3UBuilder:
                 if episode_file_extension not in EXTENSIONS_ALLOWED:
                     # print("> Skipping: {0}".format(path_to_episode_file))
                     continue
-
+                
                 result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
                                         "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", 
                                         path_to_episode_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

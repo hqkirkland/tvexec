@@ -5,15 +5,16 @@ import time
 
 from datetime import datetime, timedelta
 
-from lineup import DAY_KEYFMT, DAYS_OF_WEEK, LineupCalendar
+from lineup import DAYS_OF_WEEK, LineupCalendar
 from scheduler import StreamScheduler
-from M3UReader import M3UReader
 from commander import FFMPEGCommander
 
 if os.name == "nt":
     SHELL_NEWLINE = '\r\n'
 else:
     SHELL_NEWLINE = '\n'
+
+LISTINGS_EXCLUSIONS = ["Bumps", "Lineup"]
 
 # Entrypoint
 print("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
@@ -77,17 +78,15 @@ while True:
     scan_end_datetime = scan_datetime.replace(minute=59, second=59)
 
     while scan_datetime < scan_end_datetime:
-        day_plan = scheduler.read_day(scan_datetime, slot_key)
-        lineup_info_path = "lineup.txt"
+        day_plan = scheduler.read_day_span(scan_datetime, 12, slot_key)
+        lineup_info_path = "listings.txt"
         # .format(scan_datetime.strftime("%Y%m%d@%H_%M"))
         lineup_info_path = os.path.join(os.curdir, lineup_info_path)
 
         with open(lineup_info_path, "w+t") as broadcast_lineup_outfile:
             broadcast_lineup_outfile.writelines(
                 [
-                    "** LINEUP **",
-                    "{0}{1} @ {2}{3}".format(
-                        SHELL_NEWLINE,
+                    "{0} @ {1}{2}".format(
                         DAYS_OF_WEEK[scan_datetime.weekday()], 
                         scan_datetime.strftime("%I:%M %p"), 
                         SHELL_NEWLINE
@@ -95,7 +94,11 @@ while True:
                 ]
             )
         
-            for plan_entry in day_plan: 
+            for plan_entry in day_plan:
+                # Do listing exclusions.
+                if plan_entry["slot_entry"] in LISTINGS_EXCLUSIONS:
+                    continue
+                
                 lineup_line_entry = "{0}: {1}{2}".format(
                     plan_entry["start_datetime"].strftime("%I:%M %p"), 
                     plan_entry["slot_entry"], 
@@ -121,16 +124,30 @@ while True:
         
         scan_entry = scheduler.lineup_calendar.m3u_reader_collection[slot_entry].read_next_playlist_entry(True)
 
-        scan_entry_title = scan_entry["entry_title"]
         scan_entry_file = scan_entry["file_path"]
         scan_entry_length = timedelta(seconds=int(scan_entry["m3u_duration"]))
 
+        if "staticDurationOverride" in lineup.series_list[slot_entry]:
+            static_duration_override = lineup.series_list[slot_entry]["staticDurationOverride"]
+            scan_entry_length = timedelta(seconds=int(static_duration_override))
+
         ffmpeg_command = commander.build_cmd(slot_entry, scan_entry_file, scan_entry_length)
         
+        print("### Now Playing ###")
+        print("# {0}".format(ffmpeg_command))
+        print("###################")
+        command_end_time = datetime.now() + scan_entry_length
+
         ffmpeg_subprocess = subprocess.Popen(ffmpeg_command, shell=True, cwd=os.curdir)
-        stdout, stderr = ffmpeg_subprocess.communicate()
+        stdout, stderr = ffmpeg_subprocess.communicate()\
+        
+        if  command_end_time - datetime.now() > timedelta(minutes=1):
+            print("Warning! Command completed far ahead of schedule; pausing. Press any key to continue.")
+            input()
         
         scheduler.lineup_calendar.m3u_reader_collection[slot_entry].save_popped_playlist()
         day_plan.pop(0)
         slot_key += 1
         scan_datetime += scan_entry_length
+
+        startup_slot = 0

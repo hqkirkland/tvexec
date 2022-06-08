@@ -25,12 +25,12 @@ class StreamScheduler(object):
         else:
             return None
     
-    def read_day(self, day_datetime, slot_key=0):
+    def read_day_span(self, day_datetime, hour_span_length=6, slot_key=0):
         plan_datetime = day_datetime
         scan_hour = plan_datetime.hour
         day_queue = []
 
-        while plan_datetime < day_datetime + timedelta(hours=6):
+        while plan_datetime < day_datetime + timedelta(hours=hour_span_length):
             if scan_hour != plan_datetime.hour:
                 # Reset the slot key once we leave the hour.
                 slot_key = 0
@@ -42,6 +42,10 @@ class StreamScheduler(object):
             plan_entry = self.lineup_calendar.m3u_reader_collection[slot_entry].read_next_playlist_entry(False)
             plan_entry_length = timedelta(seconds=int(plan_entry["m3u_duration"]))
             plan_entry_file = plan_entry["file_path"]
+
+            if "staticDurationOverride" in self.lineup_calendar.series_list[slot_entry]:
+                static_duration_override = self.lineup_calendar.series_list[slot_entry]["staticDurationOverride"]
+                plan_entry_length = timedelta(seconds=int(static_duration_override))
             
             day_queue.append (
                 {

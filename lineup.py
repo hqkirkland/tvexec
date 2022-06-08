@@ -138,15 +138,16 @@ class LineupCalendar(object):
 
                 for s_key in range(0, slot_count):
 
-                    #slot_entry = lineup_strdict[d_key][h_key][s_key].strip()
-                                        
-                    if slot_entry == "" or slot_entry not in self.series_list.keys():
-                        if slot_entry != "":
-                            self.log_message("Unable to locate \"{0}\" in lineup for {1} @ {2}, Slot #{3}".format(slot_entry, d_key, h_key, s_key))
-
+                    slot_entry = lineup_strdict[d_key][h_key][s_key].strip()
+                    
+                    if slot_entry not in self.series_list.keys():
+                        self.log_message("Unable to locate \"{0}\" in lineup for {1} @ {2}, Slot #{3}".format(slot_entry, d_key, h_key, s_key))
+                        # Add entry.
                         lineup_strdict[d_key][h_key][s_key] = ""
-                        slot_entry = lineup_strdict[d_key][h_key][s_key].strip()
+                        # Ref entry.
+                        slot_entry = lineup_strdict[d_key][h_key][s_key]
 
+                    if slot_entry == "" or slot_entry not in self.series_list.keys():
                         if s_key == 0:
                             if p_h == 23:
                                 lineup_strdict[d_key][h_key][s_key] = lineup_strdict[DAYS_OF_WEEK[p_d]][HOURS_OF_DAY[p_h]][-1].strip()

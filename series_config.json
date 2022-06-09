@@ -11,6 +11,10 @@
         "description": "Water. Earth. Fire. Air. Long ago, the four nations lived together in harmony. Then, everything changed when the Fire Nation attacked.",
         "rootDirectory": "/home/hunter/NetLibrary/Airbender/"
     },
+    "Battlestar Galactica": {
+        "description": "The remaining members from humanity's Twelve Colonies seek out the Lost Colony (Earth), escaping destruction by the wrath of the Cylon.",
+        "rootDirectory": "/home/hunter/NetLibrary/Battlestar Galactica/"
+    },
     "Bumps": {
         "description": "Like Adult Swim's but with more.. vapor.",
         "rootDirectory": "/home/hunter/NetLibrary/K409 Bumps/",
@@ -35,7 +39,7 @@
     "Fullmetal Alchemist: Brotherhood": {
         "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to restore their bodies.",
         "rootDirectory": "/home/hunter/NetLibrary/Fullmetal/",
-        "outputFlags": "-b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -c:a aac -channel_layout 5.1 -g 15 -strict experimental",
+        "formatFlags": "-b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -c:a aac -channel_layout 5.1 -g 15 -strict experimental",
         "ffmpegFilterFlags": "-map 0:2 -map \"[overlay_out]\" -filter_complex \"[0:s:1][0:v:0]scale2ref[sub_out][vid_out];[vid_out][sub_out]overlay[overlay_out]\""
     },
     "King of the Hill": {
@@ -46,7 +50,9 @@
         "description": "Lineup.",
         "rootDirectory": "/home/hunter/NetLibrary/K409 Lineups/",
         "playlistType": "shuffle",
-        "ffmpegFilterFlags": "-vf \"drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/lineup.txt:x=(w-tw)/2:y=h-mod(t * 45\\, h + th):fontcolor=white:fontsize=32:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=black@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='YOU ARE WATCHING K409' : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\" -c:v libx264 -c:a aac "
+        "Ignore: staticDurationOverride": "90",
+        "Ignore: formatFlags": "-c:v libx264",
+        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=(w-tw)/2:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=purple@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
     },
     "Movies": {
         "description": "Movies. ",
@@ -80,12 +86,13 @@
     },
     "Star Trek: The Next Generation": {
         "description": "These are the voyages of the starship 'Enterprise.' Its continuing mission: to explore strange, new worlds; to seek out new life and new civilizations; to boldly go where no one has gone before!",
-        "rootDirectory": "/home/hunter/NetLibrary/Star Trek TNG/"
+        "rootDirectory": "/home/hunter/NetLibrary/Star Trek TNG/",
+        "ffmpegFilterFlags": "-filter:v fps=30"
     },
     "Star Wars": {
         "description": "Thanks to the 4K77 team and Harmy's Despecializers, these are the least-altered, highest-definition copies of the Star Wars Original Trilogy available to the public since the original box office releases.", 
         "rootDirectory": "/home/hunter/NetLibrary/Star Wars Trilogy/",
-        "outputFlags": " -b:v 56k -bufsize 56k -crf 31 -vcodec libx264 -preset ultrafast -c:a aac -b:a 320k -channel_layout 5.1 -g 15 -strict experimental"
+        "formatFlags": " -b:v 56k -bufsize 56k -crf 31 -vcodec libx264 -preset ultrafast -c:a aac -b:a 320k -channel_layout 5.1 -g 15 -strict experimental"
     },
     "Sifl and Olly": {
         "description": "Two friends host a 90's call-in access show.",

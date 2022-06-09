@@ -142,9 +142,7 @@ class LineupCalendar(object):
                     
                     if slot_entry not in self.series_list.keys():
                         self.log_message("Unable to locate \"{0}\" in lineup for {1} @ {2}, Slot #{3}".format(slot_entry, d_key, h_key, s_key))
-                        # Add entry.
                         lineup_strdict[d_key][h_key][s_key] = ""
-                        # Ref entry.
                         slot_entry = lineup_strdict[d_key][h_key][s_key]
 
                     if slot_entry == "" or slot_entry not in self.series_list.keys():

@@ -21,6 +21,17 @@ class FFMPEGCommander(object):
 
         if "ffmpegFilterFlags" in scan_series_data:
             filter_flags = scan_series_data["ffmpegFilterFlags"]
+
+            if series_key == "Lineup":
+                scrolltext = False
+                with open(r"listings.txt", 'r') as fp:
+                    for count, line in enumerate(fp):
+                        pass
+                    count += 1
+                    if count > 20:
+                        # Horrible, but necessary, patch to test scrolling text above certain file length.
+                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=(w-tw)/2:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=purple@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+
             str(filter_flags).replace('\r', '')
             str(filter_flags).replace('\n', '')
         

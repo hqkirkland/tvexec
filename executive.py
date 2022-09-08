@@ -67,10 +67,6 @@ commander = FFMPEGCommander(lineup)
 scheduler = StreamScheduler(lineup)
 
 while True:
-    if lineup.refresh():
-        commander.lineup_calendar = lineup
-        scheduler.lineup_calendar = lineup
-    
     slot_key = startup_slot
     slot_entry = None
     
@@ -78,6 +74,10 @@ while True:
     scan_end_datetime = scan_datetime.replace(minute=59, second=59)
 
     while scan_datetime < scan_end_datetime:
+        if lineup.refresh():
+            commander.lineup_calendar = lineup
+            scheduler.lineup_calendar = lineup
+        
         day_plan = scheduler.read_day_span(scan_datetime, 12, slot_key)
         lineup_info_path = "listings.txt"
         # .format(scan_datetime.strftime("%Y%m%d@%H_%M"))

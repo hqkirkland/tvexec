@@ -156,7 +156,7 @@ class LineupCalendar(object):
                     slot_entry = None
         return lineup_strdict
 
-    def commit_lineup(self, lineup_strdict):        
+    def commit_lineup(self, lineup_strdict):
         for day in range(0, 7):
             for hour in range(0, 24):
                 d_key = DAYS_OF_WEEK[day]

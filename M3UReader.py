@@ -25,7 +25,7 @@ class M3UReader:
                     
                     episode_len = int(length_segment)
                     episode_file_path = m3u_lines[i + 1].strip()
-                    episode_title = m3u_segments[1]
+                    episode_title = m3u_segments[1].split('-', 1)[-1].strip()
 
                     if os.path.isfile(episode_file_path):
                         self.playlist_entries.append({

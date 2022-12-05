@@ -52,14 +52,11 @@ class M3UBuilder:
                 episode_file_name = os.path.basename(path_to_episode_file)
                 episode_file_extension = episode_file_name.split('.')[-1]
 
-                # print("> {0} duration is {1}s".format(episode_file_name[0], str(int(episode_len))))
-
                 # Remove file extension + extra chars.
                 episode_title = episode_file_name.replace(".{0}".format(episode_file_extension), "")
                 episode_title = episode_title.replace("_", " ").replace(".", " ").replace(":", "")
 
                 if episode_file_extension not in EXTENSIONS_ALLOWED:
-                    # print("> Skipping: {0}".format(path_to_episode_file))
                     continue
                 
                 result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
@@ -73,6 +70,6 @@ class M3UBuilder:
                 except ValueError:
                     episode_len = 0.0
 
-                episode_title_line = "#EXTINF:{0},{1} - {2}".format(str(int(episode_len)), self.series_key, episode_title)
+                episode_title_line = "#EXTINF:{0},{1}".format(str(int(episode_len)), episode_title)
                 print(">> {0}".format(episode_title_line))
                 series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))

@@ -11,9 +11,15 @@ class FFMPEGCommander(object):
         filter_flags = ""
 
         if "formatFlags" in scan_series_data:
-            override_format_flags = scan_series_data["formatFlags"]
-            str(override_format_flags).replace('\r', '')
-            str(override_format_flags).replace('\n', '')
+            override_format_flags = str(scan_series_data["formatFlags"]).strip('\r').strip('\n') 
+            # str(override_format_flags)
+            #.replace('\r', '')
+            #str(override_format_flags).replace('\n', '')
+            format_flags = "{0} -f flv {1}".format(override_format_flags, self.rtmp_endpoint)
+        
+        # Hack for Frasier, other videos that use super-HQ x265 encoding.
+        elif file_path.__contains__("x265"):
+            override_format_flags = "-vcodec libx264 -c:a aac -b:a 400k -channel_layout 5.1 -b:v 56k -bufsize 56k -g 25 -strict experimental -crf 31"
             format_flags = "{0} -f flv {1}".format(override_format_flags, self.rtmp_endpoint)
 
         else:
@@ -30,7 +36,7 @@ class FFMPEGCommander(object):
                     count += 1
                     if count > 20:
                         # Horrible, but necessary, patch to test scrolling text above certain file length.
-                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=(w-tw)/2:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=purple@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=100:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=orange@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
 
             str(filter_flags).replace('\r', '')
             str(filter_flags).replace('\n', '')

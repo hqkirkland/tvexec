@@ -12,7 +12,7 @@
         "rootDirectory": "/home/hunter/NetLibrary/Airbender/"
     },
     "Battlestar Galactica": {
-        "description": "The remaining members from humanity's Twelve Colonies seek out the Lost Colony (Earth), escaping destruction by the wrath of the Cylon.",
+        "description": "The remaining members from humanity's Twelve Colonies seek out the Lost Colony (Earth), escaping destruction and the wrath of the Cylon.",
         "rootDirectory": "/home/hunter/NetLibrary/Battlestar Galactica/"
     },
     "Bumps": {
@@ -52,7 +52,7 @@
         "playlistType": "shuffle",
         "Ignore: staticDurationOverride": "90",
         "Ignore: formatFlags": "-c:v libx264",
-        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=(w-tw)/2:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=purple@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=80:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=orange@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
     },
     "Movies": {
         "description": "Movies. ",
@@ -66,6 +66,10 @@
     "MST3K": {
         "description": "Held hostage by villainous corporate captors and forced to watch awful mystery and sci-fi movies, the host and his robot pals make the best of their cringey situation with riffs, jokes, and memes.",
         "rootDirectory": "/home/hunter/NetLibrary/MST3K/"
+    },
+    "NewsRadio": {
+        "description": "WNYX in New York City always has the latest in news, sports, gossip, drama, scandal, and nonsense.",
+        "rootDirectory": "/home/hunter/NetLibrary/NewsRadio (1995-1999)/"
     },
     "Peep Show": {
         "description": "Flatmates Mark and Jez are far from being the \"odd couple\" of London. They're a lot odder.",

@@ -35,7 +35,7 @@ class StreamScheduler(object):
                 # Reset the slot key once we leave the hour.
                 slot_key = 0
                 scan_hour = plan_datetime.hour
-            self.log_message("Entering {0} ".format(plan_datetime.strftime("%A %I:%M:%S %p")))
+            self.log_message("Planning {0} ".format(plan_datetime.strftime("%A @ %I:%M:%S %p")))
             
             slot_entry = self.query_calendar(plan_datetime, slot_key)
             
@@ -50,6 +50,7 @@ class StreamScheduler(object):
             day_queue.append (
                 {
                     "slot_entry": slot_entry,
+                    "episode_title": plan_entry["entry_title"],
                     "start_datetime": plan_datetime, 
                     "end_datetime": plan_datetime + plan_entry_length,
                     "file_path": plan_entry_file

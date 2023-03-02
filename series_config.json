@@ -39,6 +39,7 @@
     "Fullmetal Alchemist: Brotherhood": {
         "description": "Edward and Alphonse Elric are alchemists traveling across the land of Amestris in search of a way to restore their bodies.",
         "rootDirectory": "/home/hunter/NetLibrary/Fullmetal/",
+        
         "formatFlags": "-b:v 64k -bufsize 64k -crf 28 -vcodec libx264 -c:a aac -channel_layout 5.1 -g 15 -strict experimental",
         "ffmpegFilterFlags": "-map 0:2 -map \"[overlay_out]\" -filter_complex \"[0:s:1][0:v:0]scale2ref[sub_out][vid_out];[vid_out][sub_out]overlay[overlay_out]\""
     },
@@ -51,8 +52,8 @@
         "rootDirectory": "/home/hunter/NetLibrary/K409 Lineups/",
         "playlistType": "shuffle",
         "Ignore: staticDurationOverride": "90",
-        "Ignore: formatFlags": "-c:v libx264",
-        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=80:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=orange@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+        "Ignore: formatFlags": "-c:v libx265",
+        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=80:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *':x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
     },
     "Movies": {
         "description": "Movies. ",

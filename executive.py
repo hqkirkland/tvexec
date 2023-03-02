@@ -155,7 +155,7 @@ while True:
         
         if  command_end_time - datetime.now() > timedelta(minutes=1):
             if dst_cmd_effect != datetime.now().dst():
-                print("Daylight savings time now in effect.")
+                print("Daylight savings time currently in effect.")
             else:
                 print("Warning! Command completed far ahead of schedule; pausing. Press any key to continue.")
                 input()

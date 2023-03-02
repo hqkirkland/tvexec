@@ -12,9 +12,6 @@ class FFMPEGCommander(object):
 
         if "formatFlags" in scan_series_data:
             override_format_flags = str(scan_series_data["formatFlags"]).strip('\r').strip('\n') 
-            # str(override_format_flags)
-            #.replace('\r', '')
-            #str(override_format_flags).replace('\n', '')
             format_flags = "{0} -f flv {1}".format(override_format_flags, self.rtmp_endpoint)
         
         # Hack for Frasier, other videos that use super-HQ x265 encoding.
@@ -36,7 +33,7 @@ class FFMPEGCommander(object):
                     count += 1
                     if count > 20:
                         # Horrible, but necessary, patch to test scrolling text above certain file length.
-                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=100:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=orange@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS * : x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=100:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *': x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
 
             str(filter_flags).replace('\r', '')
             str(filter_flags).replace('\n', '')

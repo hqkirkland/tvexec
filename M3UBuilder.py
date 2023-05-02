@@ -46,6 +46,7 @@ class M3UBuilder:
                 random.shuffle(files_in_series)
 
             for episode_file in files_in_series:
+                series_m3u.writelines('\n\n')
                 path_to_episode_file = os.path.normpath(os.path.join(subdir_season_path, episode_file))
                 # print("Episode path: {0}".format(path_to_episode_file))
 
@@ -72,4 +73,4 @@ class M3UBuilder:
 
                 episode_title_line = "#EXTINF:{0},{1}".format(str(int(episode_len)), episode_title)
                 print(">> {0}".format(episode_title_line))
-                series_m3u.writelines((episode_title_line + '\n', path_to_episode_file + '\n\n'))
+                series_m3u.writelines((episode_title_line + '\n', path_to_episode_file))

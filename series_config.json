@@ -53,7 +53,7 @@
         "playlistType": "shuffle",
         "Ignore: staticDurationOverride": "90",
         "Ignore: formatFlags": "-c:v libx265",
-        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=80:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *':x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+        "ffmpegFilterFlags": "-filter_complex \"loudnorm=I=-23;scale=w=1280:h=720:force_original_aspect_ratio=increase,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=80:y=100:fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *':x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
     },
     "Movies": {
         "description": "Movies. ",
@@ -82,7 +82,7 @@
         "playlistType": "shuffle"
     },
     "Stargate SG-1": {
-        "description": "SG-1 is Earth's best chance at exploring and securing the Stargate network, which link distant worlds across the galaxy.",
+        "description": "SG-1 is Earth's best chance at exploring and securing the Stargate network, which connects distant worlds across the galaxy.",
         "rootDirectory": "/home/hunter/NetLibrary/Stargate SG-1/" 
     },
     "Star Trek: Deep Space 9": {

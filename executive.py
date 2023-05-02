@@ -86,11 +86,7 @@ while True:
         with open(lineup_info_path, "w+t") as broadcast_lineup_outfile:
             broadcast_lineup_outfile.writelines(
                 [
-                    "{0} @ {1}{2}".format(
-                        DAYS_OF_WEEK[scan_datetime.weekday()], 
-                        scan_datetime.strftime("%I:%M %p"), 
-                        SHELL_NEWLINE
-                    )
+                    "%{localtime:%A} @ %{localtime:%r}\n\n"
                 ]
             )
         

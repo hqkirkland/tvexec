@@ -1,7 +1,7 @@
 from lineup import LineupCalendar
 
 class FFMPEGCommander(object):
-    def __init__(self, lineup_calendar: LineupCalendar, rtmp_ept="rtmp://127.0.0.1/show/stream"):
+    def __init__(self, lineup_calendar: LineupCalendar, rtmp_ept="rtmp://127.0.0.1/channels/K409"):
         self.lineup_calendar = lineup_calendar
         self.rtmp_endpoint = rtmp_ept
     
@@ -33,7 +33,7 @@ class FFMPEGCommander(object):
                     count += 1
                     if count > 20:
                         # Horrible, but necessary, patch to test scrolling text above certain file length.
-                        filter_flags = "-filter_complex \"loudnorm=I=-23;drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=100:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *': x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
+                        filter_flags = "-filter_complex \"loudnorm=I=-23;scale=w=1280:h=720:force_original_aspect_ratio=increase,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:textfile=/home/hunter/tvexec/listings.txt:x=100:y=h-mod(t * 45\, h + th):fontcolor=0xFFFFFF:fontsize=34:line_spacing=2, drawbox=x=0:y=0:w=iw:h=75:color=0x0094FF@1:t=fill,drawtext=fontfile=/home/hunter/NetLibrary/Teletactile-3zavL.ttf:text='* K409 LISTINGS *': x=(w-tw)/2:y=36:fontcolor=white:fontsize=36\""
 
             str(filter_flags).replace('\r', '')
             str(filter_flags).replace('\n', '')
